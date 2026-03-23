@@ -1,0 +1,27 @@
+# Build outputs
+build/
+*.o
+*.so
+*.a
+a.out*
+aria-safety/aria-safety
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# Node
+node_modules/
+*.vsix
+
+# Editor
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
