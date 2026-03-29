@@ -15,6 +15,8 @@
  *   [EXTERN]   extern declaration — FFI boundary; verify foreign function safety
  *   [CAST]     transmute/reinterpret — unchecked type conversion
  *   [TODO]     TODO/FIXME/HACK comment — unfinished or fragile code
+ *   [SYSCALL]  sys!!/sys!!! — full/raw tier direct syscall (TOS escalation)
+ *   [EMPHATIC] ?! — emphatic unwrap, calls failsafe on error (TOS escalation)
  *
  * Build:
  *   gcc -O2 -Wall -Wextra -std=c99 -o aria-safety aria_safety.c
@@ -137,6 +139,13 @@ static const Pattern PATTERNS[] = {
     /* unchecked casts */
     { "transmute(",             0, "CAST",    "transmute() — unchecked type reinterpretation; verify layout compatibility" },
     { "reinterpret(",           0, "CAST",    "reinterpret() — unchecked cast; verify type is valid" },
+
+    /* direct syscalls (sys!!! before sys!! to prevent substring match) */
+    { "sys!!!(",                0, "SYSCALL", "sys!!!() raw-tier syscall — bare int64 return, no safety wrapping" },
+    { "sys!!(",                 0, "SYSCALL", "sys!!() full-tier syscall — all syscalls allowed, verify necessity" },
+
+    /* TOS escalation operators */
+    { "?!",                     0, "EMPHATIC","?! emphatic unwrap — calls failsafe on error; verify this is intentional" },
 };
 
 #define N_PATTERNS (sizeof(PATTERNS) / sizeof(PATTERNS[0]))
@@ -395,6 +404,8 @@ int main(int argc, char **argv)
             "  [EXTERN]   extern declaration — FFI boundary\n"
             "  [CAST]     transmute/reinterpret — unchecked type conversion\n"
             "  [TODO]     TODO/FIXME/HACK comment — unfinished code\n"
+            "  [SYSCALL]  sys!!/sys!!! — full/raw tier direct syscall\n"
+            "  [EMPHATIC] ?! — emphatic unwrap, calls failsafe on error\n"
             "\n"
             "Exit codes: 0 = clean, 1 = findings, 2 = error\n");
         return 2;
