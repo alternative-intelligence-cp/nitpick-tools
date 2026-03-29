@@ -4,9 +4,9 @@
  *
  * Findings:
  *   [WILD]     wild / wildx allocation — manual lifetime, no GC safety
- *   [RAW]      raw() — strips Result<T>; caller owns error handling
+ *   [RAW]      raw() / _! — strips Result<T>; caller owns error handling
  *   [RESULT]   Result{...} — explicit Result construction; caller builds Result manually
- *   [DROP]     drop() — explicitly discards a Result<T>
+ *   [DROP]     drop() / _? — explicitly discards a Result<T>
  *   [OK]       ok() — bypasses error check on the unknown type
  *   [WEAK_CAS] compare_exchange_weak* — spurious failure; must be in retry loop
  *   [RELAXED]  relaxed atomic op — verify memory ordering is sufficient
@@ -113,8 +113,10 @@ static const Pattern PATTERNS[] = {
 
     /* Result<T> bypasses */
     { "raw(",                  1, "RAW",     "raw() strips Result<T> — caller must handle failure explicitly" },
+    { "_!",                    0, "RAW",     "_! raw extraction shorthand — bypasses error check (desugars to raw())" },
     { "Result{",               0, "RESULT",  "Result{...} explicit construction — verify val/err/is_error fields are correct" },
     { "drop(",                 1, "DROP",    "drop() discards Result<T> — confirm this error is intentionally ignored" },
+    { "_?",                    0, "DROP",    "_? drop shorthand — discards Result without checking (desugars to drop())" },
     { "ok(",                   1, "OK",      "ok() bypasses unknown error check — ensure value is known-good" },
 
     /* weak CAS */
@@ -393,9 +395,9 @@ int main(int argc, char **argv)
             "\n"
             "Finds:\n"
             "  [WILD]     wild / wildx allocation\n"
-            "  [RAW]      raw() call — strips Result<T>\n"
+            "  [RAW]      raw() / _! — strips Result<T>\n"
             "  [RESULT]   Result{...} — explicit Result construction\n"
-            "  [DROP]     drop() call — discards Result<T>\n"
+            "  [DROP]     drop() / _? — discards Result<T>\n"
             "  [OK]       ok() call — bypasses unknown error check\n"
             "  [WEAK_CAS] compare_exchange_weak — must be in retry loop\n"
             "  [RELAXED]  relaxed atomic operation\n"
