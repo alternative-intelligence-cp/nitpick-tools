@@ -19,13 +19,13 @@ jobs:
         run: |
           cd aria-safety
           make
-          test -f aria_safety && echo "aria_safety built" || exit 1
+          test -f aria-safety && echo "aria-safety built" || exit 1
 
       - name: Smoke test
         run: |
           cd aria-safety
           echo 'func:main = int32() { exit(0); };' > /tmp/test.aria
-          ./aria_safety /tmp/test.aria || true
+          ./aria-safety /tmp/test.aria || true
           echo "Safety auditor runs without crash"
 
   mcp-server:
