@@ -40,6 +40,38 @@
                 "language": "aria",
                 "path": "./snippets/aria.json"
             }
-        ]
+        ],
+        "configurationDefaults": {
+            "editor.tokenColorCustomizations": {
+                "textMateRules": [
+                    {
+                        "scope": [
+                            "keyword.danger.memory.aria",
+                            "keyword.danger.raw.aria",
+                            "keyword.danger.drop.aria",
+                            "keyword.danger.shorthand.aria",
+                            "keyword.danger.syscall.aria",
+                            "keyword.danger.failsafe-call.aria"
+                        ],
+                        "settings": {
+                            "foreground": "#FF4444",
+                            "fontStyle": "bold"
+                        }
+                    },
+                    {
+                        "scope": [
+                            "keyword.warning.defaults.aria",
+                            "keyword.warning.defaults-op.aria",
+                            "keyword.warning.ok.aria",
+                            "keyword.warning.failsafe.aria"
+                        ],
+                        "settings": {
+                            "foreground": "#FFCC00",
+                            "fontStyle": "bold"
+                        }
+                    }
+                ]
+            }
+        }
     }
 }

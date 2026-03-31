@@ -10,6 +10,8 @@
         { "include": "#numbers" },
         { "include": "#borrow-annotations" },
         { "include": "#function-declaration" },
+        { "include": "#danger-keywords" },
+        { "include": "#warning-keywords" },
         { "include": "#failsafe" },
         { "include": "#keywords" },
         { "include": "#types" },
@@ -66,16 +68,74 @@
                 }
             ]
         },
+        "danger-keywords": {
+            "patterns": [
+                {
+                    "comment": "Safety opt-out: manual memory (no GC)",
+                    "name": "keyword.danger.memory.aria",
+                    "match": "\\b(wild|wildx)\\b"
+                },
+                {
+                    "comment": "Safety opt-out: raw unwrap bypasses Result safety",
+                    "name": "keyword.danger.raw.aria",
+                    "match": "\\braw\\b"
+                },
+                {
+                    "comment": "Safety opt-out: drop discards Result",
+                    "name": "keyword.danger.drop.aria",
+                    "match": "\\bdrop\\b"
+                },
+                {
+                    "comment": "Safety opt-out: _! raw shorthand, _? drop shorthand",
+                    "name": "keyword.danger.shorthand.aria",
+                    "match": "_[!?]"
+                },
+                {
+                    "comment": "Safety opt-out: sys syscall with any bang tier",
+                    "name": "keyword.danger.syscall.aria",
+                    "match": "\\bsys\\s*!{1,3}\\s*(?=\\()"
+                },
+                {
+                    "comment": "Failsafe call operator !!! (force-crash on error)",
+                    "name": "keyword.danger.failsafe-call.aria",
+                    "match": "!!!(?!=)"
+                }
+            ]
+        },
+        "warning-keywords": {
+            "patterns": [
+                {
+                    "comment": "Error-aware: defaults keyword — scoped fallback",
+                    "name": "keyword.warning.defaults.aria",
+                    "match": "\\bdefaults\\b"
+                },
+                {
+                    "comment": "Error-aware: ?| operator — scoped fallback shorthand",
+                    "name": "keyword.warning.defaults-op.aria",
+                    "match": "\\?\\|"
+                },
+                {
+                    "comment": "Error-aware: ok — acknowledge value may be unknown/error",
+                    "name": "keyword.warning.ok.aria",
+                    "match": "\\bok\\b"
+                },
+                {
+                    "comment": "Error-aware: failsafe — required error handler",
+                    "name": "keyword.warning.failsafe.aria",
+                    "match": "\\bfailsafe\\b"
+                }
+            ]
+        },
         "failsafe": {
             "patterns": [
                 {
-                    "comment": "failsafe block — required error handler",
-                    "name": "keyword.control.failsafe.aria",
+                    "comment": "failsafe block — required error handler (kept for compat)",
+                    "name": "keyword.warning.failsafe.aria",
                     "match": "\\bfailsafe\\b"
                 },
                 {
-                    "comment": "Failsafe call operator !!!",
-                    "name": "keyword.operator.failsafe.aria",
+                    "comment": "Failsafe call operator !!! (danger)",
+                    "name": "keyword.danger.failsafe-call.aria",
                     "match": "!!!(?!=)"
                 }
             ]
@@ -118,7 +178,7 @@
                 },
                 {
                     "name": "keyword.other.aria",
-                    "match": "\\b(use|as|is|wild|wildx|cfg|requires|ensures|invariant)\\b"
+                    "match": "\\b(use|as|is|cfg|requires|ensures|invariant)\\b"
                 },
                 {
                     "name": "keyword.memory.aria",

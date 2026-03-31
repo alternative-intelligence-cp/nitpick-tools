@@ -7,19 +7,19 @@
         { "include": "#preprocessor" },
         { "include": "#magic-constants" },
         { "include": "#strings" },
-        { "include": "#function-declarations" },
-        { "include": "#variable-declarations" },
         { "include": "#numbers" },
         { "include": "#borrow-annotations" },
+        { "include": "#function-declaration" },
+        { "include": "#danger-keywords" },
+        { "include": "#warning-keywords" },
+        { "include": "#failsafe" },
         { "include": "#keywords" },
         { "include": "#types" },
-        { "include": "#function-calls" },
+        { "include": "#builtins" },
         { "include": "#operators" },
-        { "include": "#memory-qualifiers" },
-        { "include": "#constants" }
+        { "include": "#variables" }
     ],
     "repository": {
-
         "comments": {
             "patterns": [
                 {
@@ -33,11 +33,9 @@
                 }
             ]
         },
-
         "preprocessor": {
             "patterns": [
                 {
-                    "comment": "Preprocessor directives: %define, %macro, %ifdef, etc.",
                     "name": "keyword.control.directive.aria",
                     "match": "%(?:define|undef|macro|endmacro|ifdef|ifndef|else|endif|include|rep|endrep|push|pop|assign|rotate)\\b"
                 },
@@ -48,142 +46,100 @@
                 }
             ]
         },
-
         "magic-constants": {
             "patterns": [
                 {
-                    "comment": "Compile-time magic constants",
                     "name": "constant.language.magic.aria",
                     "match": "\\b(__FILE__|__LINE__|__COUNTER__)\\b"
                 }
             ]
         },
-
-        "strings": {
+        "function-declaration": {
             "patterns": [
                 {
-                    "comment": "Template string with interpolation: `hello &{name}`",
-                    "name": "string.template.aria",
-                    "begin": "`",
-                    "end": "`",
-                    "patterns": [
-                        {
-                            "name": "meta.embedded.expression.aria",
-                            "begin": "&\\{",
-                            "end": "\\}",
-                            "beginCaptures": {
-                                "0": { "name": "punctuation.definition.template-expression.begin.aria" }
-                            },
-                            "endCaptures": {
-                                "0": { "name": "punctuation.definition.template-expression.end.aria" }
-                            },
-                            "patterns": [{ "include": "$self" }]
-                        },
-                        {
-                            "name": "constant.character.escape.aria",
-                            "match": "\\\\."
-                        }
-                    ]
-                },
-                {
-                    "name": "string.quoted.double.aria",
-                    "begin": "\"",
-                    "end": "\"",
-                    "patterns": [
-                        {
-                            "name": "constant.character.escape.aria",
-                            "match": "\\\\."
-                        }
-                    ]
-                }
-            ]
-        },
-
-        "function-declarations": {
-            "comment": "Matches: [pub] func:name = ReturnType(params) { }",
-            "patterns": [
-                {
-                    "name": "meta.function.declaration.aria",
-                    "match": "\\b(func)\\s*(:)\\s*([a-zA-Z_][a-zA-Z0-9_]*)",
+                    "comment": "func:name pattern — highlights func as keyword and name as function",
+                    "match": "\\b((?:pub|priv|inline|noinline|async|comptime|extern)\\s+)*(func)(:)(\\w+)",
                     "captures": {
-                        "1": { "name": "keyword.declaration.function.aria" },
-                        "2": { "name": "punctuation.separator.function.aria" },
-                        "3": { "name": "entity.name.function.aria" }
+                        "1": { "name": "storage.modifier.aria" },
+                        "2": { "name": "keyword.declaration.function.aria" },
+                        "3": { "name": "punctuation.separator.aria" },
+                        "4": { "name": "entity.name.function.aria" }
                     }
                 }
             ]
         },
-
-        "variable-declarations": {
-            "comment": "Matches type:name declaration: int32:x, uint64:count, bool:flag",
+        "danger-keywords": {
             "patterns": [
                 {
-                    "name": "meta.variable.declaration.aria",
-                    "match": "\\b(int1|int2|int4|int8|int16|int32|int64|int128|int256|int512|int1024|int2048|int4096|uint1|uint2|uint4|uint8|uint16|uint32|uint64|uint128|uint256|uint512|uint1024|uint2048|uint4096|flt16|flt32|flt64|flt128|flt256|flt512|bool|str|string|void|tbb8|tbb16|tbb32|tbb64|tbb128|tbb256|fix256|tfp32|tfp64|frac8|frac16|frac32|frac64|fixed|trit|tryte|nit|nyte|array|binary|buffer|matrix|tensor|tmatrix|ttensor|vec2|vec3|vec9|dyn|obj|opaque|Type)\\s*(:)\\s*([a-zA-Z_][a-zA-Z0-9_]*)",
-                    "captures": {
-                        "1": { "name": "storage.type.aria" },
-                        "2": { "name": "punctuation.separator.type.aria" },
-                        "3": { "name": "variable.name.aria" }
-                    }
+                    "comment": "Safety opt-out: manual memory (no GC)",
+                    "name": "keyword.danger.memory.aria",
+                    "match": "\\b(wild|wildx)\\b"
+                },
+                {
+                    "comment": "Safety opt-out: raw unwrap bypasses Result safety",
+                    "name": "keyword.danger.raw.aria",
+                    "match": "\\braw\\b"
+                },
+                {
+                    "comment": "Safety opt-out: drop discards Result",
+                    "name": "keyword.danger.drop.aria",
+                    "match": "\\bdrop\\b"
+                },
+                {
+                    "comment": "Safety opt-out: _! raw shorthand, _? drop shorthand",
+                    "name": "keyword.danger.shorthand.aria",
+                    "match": "_[!?]"
+                },
+                {
+                    "comment": "Safety opt-out: sys syscall with any bang tier",
+                    "name": "keyword.danger.syscall.aria",
+                    "match": "\\bsys\\s*!{1,3}\\s*(?=\\()"
+                },
+                {
+                    "comment": "Failsafe call operator !!! (force-crash on error)",
+                    "name": "keyword.danger.failsafe-call.aria",
+                    "match": "!!!(?!=)"
                 }
             ]
         },
-
-        "numbers": {
+        "warning-keywords": {
             "patterns": [
                 {
-                    "comment": "Balanced ternary literals: 0t1T0 (T=-1, 1=+1, 0=0)",
-                    "name": "constant.numeric.ternary.aria",
-                    "match": "\\b0t[01T]+\\b"
+                    "comment": "Error-aware: defaults keyword — scoped fallback",
+                    "name": "keyword.warning.defaults.aria",
+                    "match": "\\bdefaults\\b"
                 },
                 {
-                    "comment": "Balanced nonary literals: 0n4D (D=-4)",
-                    "name": "constant.numeric.nonary.aria",
-                    "match": "\\b0n[0-9A-D]+\\b"
+                    "comment": "Error-aware: ?| operator — scoped fallback shorthand",
+                    "name": "keyword.warning.defaults-op.aria",
+                    "match": "\\?\\|"
                 },
                 {
-                    "name": "constant.numeric.hex.aria",
-                    "match": "\\b0[xX][0-9a-fA-F_]+\\b"
+                    "comment": "Error-aware: ok — acknowledge value may be unknown/error",
+                    "name": "keyword.warning.ok.aria",
+                    "match": "\\bok\\b"
                 },
                 {
-                    "name": "constant.numeric.binary.aria",
-                    "match": "\\b0[bB][01_]+\\b"
-                },
-                {
-                    "name": "constant.numeric.octal.aria",
-                    "match": "\\b0[oO][0-7_]+\\b"
-                },
-                {
-                    "comment": "Typed float literal: 3.14flt64, 0.5fix256, 1.5tf",
-                    "name": "constant.numeric.float.typed.aria",
-                    "match": "\\b(\\d[\\d_]*\\.\\d[\\d_]*(?:[eE][+-]?\\d[\\d_]*)?)(flt32|flt64|fix256|tf)\\b",
-                    "captures": {
-                        "1": { "name": "constant.numeric.float.aria" },
-                        "2": { "name": "storage.type.numeric-suffix.aria" }
-                    }
-                },
-                {
-                    "comment": "Typed integer literal: 42i32, 100u64, 127tbb8",
-                    "name": "constant.numeric.integer.typed.aria",
-                    "match": "\\b(\\d[\\d_]*)(i8|i16|i32|i64|i128|u8|u16|u32|u64|u128|tbb8|tbb16|tbb32|tbb64)\\b",
-                    "captures": {
-                        "1": { "name": "constant.numeric.integer.aria" },
-                        "2": { "name": "storage.type.numeric-suffix.aria" }
-                    }
-                },
-                {
-                    "comment": "Bare float (no suffix)",
-                    "name": "constant.numeric.float.aria",
-                    "match": "\\b\\d[\\d_]*\\.\\d[\\d_]*(?:[eE][+-]?\\d[\\d_]*)?\\b"
-                },
-                {
-                    "comment": "Bare integer (no suffix)",
-                    "name": "constant.numeric.integer.aria",
-                    "match": "\\b\\d[\\d_]*\\b"
+                    "comment": "Error-aware: failsafe — required error handler",
+                    "name": "keyword.warning.failsafe.aria",
+                    "match": "\\bfailsafe\\b"
                 }
             ]
         },
-
+        "failsafe": {
+            "patterns": [
+                {
+                    "comment": "failsafe block — required error handler (kept for compat)",
+                    "name": "keyword.warning.failsafe.aria",
+                    "match": "\\bfailsafe\\b"
+                },
+                {
+                    "comment": "Failsafe call operator !!! (danger)",
+                    "name": "keyword.danger.failsafe-call.aria",
+                    "match": "!!!(?!=)"
+                }
+            ]
+        },
         "borrow-annotations": {
             "patterns": [
                 {
@@ -194,287 +150,229 @@
                 {
                     "comment": "$ as borrow/iteration variable",
                     "name": "variable.language.iterator.aria",
-                    "match": "\\$(?![a-zA-Z{])"
+                    "match": "\\$(?![a-zA-Z])"
                 }
             ]
         },
-
         "keywords": {
             "patterns": [
                 {
-                    "comment": "Return mechanisms — pass and fail are Aria's return/throw equivalents",
+                    "name": "keyword.control.flow.aria",
+                    "match": "\\b(if|else|while|for|till|loop|when|then|end|pick|fall|break|continue|match|in)\\b"
+                },
+                {
                     "name": "keyword.control.return.aria",
-                    "match": "\\b(pass|fail)\\b"
+                    "match": "\\b(pass|fail|return)\\b"
                 },
                 {
-                    "comment": "Control flow",
-                    "name": "keyword.control.aria",
-                    "match": "\\b(if|else|when|then|end|till|while|for|in|loop|pick|case|default|break|continue|fall|defer|async|await|catch|return)\\b"
+                    "name": "keyword.control.async.aria",
+                    "match": "\\b(async|await|catch)\\b"
                 },
                 {
-                    "comment": "TOS explicit bypass builtins — drop(), raw(), ok()",
-                    "name": "support.function.builtin.aria",
-                    "match": "\\b(drop|raw|ok)\\b(?=\\s*\\()"
-                },
-                {
-                    "comment": "Standard output",
-                    "name": "support.function.builtin.print.aria",
-                    "match": "\\b(print|println)\\b(?=\\s*\\()"
-                },
-                {
-                    "comment": "Module and FFI system",
-                    "name": "keyword.declaration.module.aria",
-                    "match": "\\b(use|extern|mod)\\b"
-                },
-                {
-                    "comment": "Visibility modifier",
-                    "name": "keyword.modifier.visibility.aria",
-                    "match": "\\b(pub)\\b"
-                },
-                {
-                    "comment": "Type / struct declaration",
                     "name": "keyword.declaration.aria",
-                    "match": "\\b(struct|enum|trait|impl|type|const)\\b"
+                    "match": "\\b(func|struct|enum|trait|impl|opaque|mod)\\b"
                 },
                 {
-                    "comment": "Contract annotations",
-                    "name": "keyword.other.contract.aria",
-                    "match": "\\b(requires|ensures|invariant)\\b"
+                    "name": "storage.modifier.aria",
+                    "match": "\\b(pub|extern|const|fixed|comptime|inline|noinline|move|defer|dyn)\\b"
                 },
                 {
-                    "comment": "Compilation and optimization modifiers",
-                    "name": "keyword.modifier.aria",
-                    "match": "\\b(comptime|inline|noinline|cfg)\\b"
-                },
-                {
-                    "comment": "Concurrency and I/O keywords",
-                    "name": "keyword.other.concurrency.aria",
-                    "match": "\\b(process|pipe|stream|debug)\\b"
-                },
-                {
-                    "comment": "Atomic memory ordering",
-                    "name": "keyword.other.atomic-ordering.aria",
-                    "match": "\\b(acq_rel|acquire|relaxed|release|seq_cst)\\b"
-                },
-                {
-                    "comment": "Executable memory allocation mode (JIT, use wild for W^X)",
-                    "name": "keyword.other.memory-mode.aria",
-                    "match": "\\b(wild|wildx)\\b"
-                },
-                {
-                    "comment": "Failsafe — required error handler",
-                    "name": "keyword.control.failsafe.aria",
-                    "match": "\\bfailsafe\\b"
-                },
-                {
-                    "comment": "Other language keywords",
                     "name": "keyword.other.aria",
-                    "match": "\\b(as|is|ref|mut|move|copy|superpose|collapse)\\b"
+                    "match": "\\b(use|as|is|cfg|requires|ensures|invariant)\\b"
+                },
+                {
+                    "name": "keyword.memory.aria",
+                    "match": "\\b(stack|gc|relaxed|acquire|release|acq_rel|seq_cst)\\b"
+                },
+                {
+                    "name": "keyword.other.stream.aria",
+                    "match": "\\b(stream|pipe|process|buffer|debug)\\b"
                 }
             ]
         },
-
         "types": {
             "patterns": [
                 {
-                    "comment": "TBB (Twisted Balanced Binary) — symmetric signed, ERR sentinel",
-                    "name": "storage.type.tbb.aria",
-                    "match": "\\b(tbb8|tbb16|tbb32|tbb64|tbb128|tbb256)\\b"
-                },
-                {
-                    "comment": "Deterministic fixed-point and twisted-float",
-                    "name": "storage.type.fixedpoint.aria",
-                    "match": "\\b(fix256|tfp32|tfp64|frac8|frac16|frac32|frac64|fixed)\\b"
-                },
-                {
-                    "comment": "Balanced ternary/nonary scalars",
-                    "name": "storage.type.balanced.aria",
-                    "match": "\\b(trit|tryte|nit|nyte)\\b"
-                },
-                {
-                    "comment": "Signed integers",
+                    "comment": "Standard integer types",
                     "name": "storage.type.integer.aria",
-                    "match": "\\b(int1|int2|int4|int8|int16|int32|int64|int128|int256|int512|int1024|int2048|int4096)\\b"
+                    "match": "\\b(int(?:1|2|4|8|16|32|64|128|256|512|1024|2048|4096)|uint(?:1|2|4|8|16|32|64|128|256|512|1024|2048|4096))\\b"
                 },
                 {
-                    "comment": "Unsigned integers",
-                    "name": "storage.type.unsigned.aria",
-                    "match": "\\b(uint1|uint2|uint4|uint8|uint16|uint32|uint64|uint128|uint256|uint512|uint1024|uint2048|uint4096)\\b"
-                },
-                {
-                    "comment": "Floating-point",
+                    "comment": "Floating point types",
                     "name": "storage.type.float.aria",
-                    "match": "\\b(flt16|flt32|flt64|flt128|flt256|flt512)\\b"
+                    "match": "\\b(flt32|flt64|flt128|flt256|flt512|fix256)\\b"
                 },
                 {
-                    "comment": "Primitive types (str is shorthand alias for string)",
-                    "name": "storage.type.primitive.aria",
-                    "match": "\\b(bool|str|string|void)\\b"
+                    "comment": "Balanced ternary types",
+                    "name": "storage.type.ternary.aria",
+                    "match": "\\b(tbb8|tbb16|tbb32|tbb64|trit|tryte|nit|nyte)\\b"
                 },
                 {
-                    "comment": "Container and compound types",
-                    "name": "storage.type.container.aria",
-                    "match": "\\b(array|binary|buffer|matrix|tensor|tmatrix|ttensor|vec2|vec3|vec9)\\b"
+                    "comment": "Fraction types",
+                    "name": "storage.type.fraction.aria",
+                    "match": "\\b(frac8|frac16|frac32|frac64)\\b"
                 },
                 {
-                    "comment": "Type system keywords",
-                    "name": "storage.type.meta.aria",
-                    "match": "\\b(dyn|obj|opaque|Type)\\b"
+                    "comment": "Twisted floating point types",
+                    "name": "storage.type.tfp.aria",
+                    "match": "\\b(tfp32|tfp64)\\b"
                 },
                 {
-                    "comment": "Generic container types — only when followed by < to reduce false positives",
-                    "name": "storage.type.generic.aria",
-                    "match": "\\b(Result|Handle|arena|atomic|simd|quantum|complex)\\b(?=\\s*<)"
+                    "comment": "Vector, matrix, tensor types",
+                    "name": "storage.type.composite.aria",
+                    "match": "\\b(vec2|vec3|vec9|matrix|tmatrix|tensor|ttensor|array|binary)\\b"
+                },
+                {
+                    "comment": "Core types: bool, string, object, unknown",
+                    "name": "storage.type.core.aria",
+                    "match": "\\b(bool|string|obj|unknown)\\b"
+                },
+                {
+                    "comment": "NIL constant (null equivalent)",
+                    "name": "constant.language.nil.aria",
+                    "match": "\\bNIL\\b"
                 }
             ]
         },
-
-        "function-calls": {
+        "builtins": {
             "patterns": [
                 {
-                    "name": "entity.name.function.call.aria",
-                    "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*(?=\\()"
+                    "name": "support.function.builtin.aria",
+                    "match": "\\b(print|println|eprint|eprintln|assert|sizeof|typeof|alignof)\\b"
                 }
             ]
         },
-
-        "operators": {
+        "strings": {
             "patterns": [
                 {
-                    "comment": "Emphatic Result unwrap — triggers failsafe on error",
-                    "name": "keyword.operator.result.emphatic-unwrap.aria",
-                    "match": "\\?!"
+                    "name": "string.quoted.double.aria",
+                    "begin": "\"",
+                    "end": "\"",
+                    "patterns": [
+                        {
+                            "name": "constant.character.escape.aria",
+                            "match": "\\\\(n|t|r|\\\\|\"|'|0)"
+                        },
+                        {
+                            "name": "constant.character.escape.aria",
+                            "match": "\\\\x[0-9A-Fa-f]{2}"
+                        },
+                        {
+                            "name": "constant.character.escape.aria",
+                            "match": "\\\\u[0-9A-Fa-f]{4}"
+                        }
+                    ]
                 },
                 {
-                    "comment": "Unchecked explicit bypass",
-                    "name": "keyword.operator.unchecked.aria",
-                    "match": "!!!"
+                    "name": "string.quoted.single.aria",
+                    "begin": "'",
+                    "end": "'",
+                    "patterns": [
+                        {
+                            "name": "constant.character.escape.aria",
+                            "match": "\\\\(n|t|r|\\\\|\"|'|0)"
+                        }
+                    ]
                 },
                 {
-                    "comment": "Null/unknown coalescing",
-                    "name": "keyword.operator.result.null-coalesce.aria",
-                    "match": "\\?\\?"
-                },
-                {
-                    "comment": "Safe Result unwrap with default: val ? default",
-                    "name": "keyword.operator.result.safe-unwrap.aria",
-                    "match": "(?<![?!])\\?(?![?!])"
-                },
-                {
-                    "comment": "Range: .. (inclusive) and ... (exclusive)",
-                    "name": "keyword.operator.range.aria",
-                    "match": "\\.\\.\\.?"
-                },
-                {
-                    "comment": "Pipeline operators |> and <|",
-                    "name": "keyword.operator.pipeline.aria",
-                    "match": "\\|>|<\\|"
-                },
-                {
-                    "comment": "Three-way comparison <=>",
-                    "name": "keyword.operator.spaceship.aria",
-                    "match": "<=>"
-                },
-                {
-                    "comment": "Dimensional type cast =>",
-                    "name": "keyword.operator.dimensional-cast.aria",
-                    "match": "=>"
-                },
-                {
-                    "comment": "Blueprint pointer dereference <-ptr",
-                    "name": "keyword.operator.dereference.aria",
-                    "match": "<-"
-                },
-                {
-                    "comment": "Blueprint pointer type annotation ->",
-                    "name": "keyword.operator.pointer-type.aria",
-                    "match": "->(?!=)"
-                },
-                {
-                    "comment": "Compiler intrinsics: @cast<T>, @addr",
-                    "name": "keyword.operator.intrinsic.aria",
-                    "match": "@(?:cast|addr)\\b"
-                },
-                {
-                    "comment": "Address-of / memory operator @",
-                    "name": "keyword.operator.address.aria",
-                    "match": "@"
-                },
-                {
-                    "comment": "Pin operator — pins value at fixed address",
-                    "name": "keyword.operator.pin.aria",
-                    "match": "#(?!%)"
-                },
-                {
-                    "comment": "Arithmetic",
-                    "name": "keyword.operator.arithmetic.aria",
-                    "match": "\\+(?![=])|(?<!<)(?<!-)(?<!-)(?<![^<]-)(?<![-<])-(?!>)(?![=])|(?<!\\*)/(?![/=])|(?<!/)\\*(?![=])|%(?![=])"
-                },
-                {
-                    "comment": "Comparison",
-                    "name": "keyword.operator.comparison.aria",
-                    "match": "==|!=|<=(?!>)|>=|<(?![-=<|])|>(?![>=])"
-                },
-                {
-                    "comment": "Logical",
-                    "name": "keyword.operator.logical.aria",
-                    "match": "&&|\\|\\||!(?![!=])"
-                },
-                {
-                    "comment": "Bitwise",
-                    "name": "keyword.operator.bitwise.aria",
-                    "match": "&(?!&)|\\|(?!\\||>)|\\^|<<(?![=])|>>(?![=])|~"
-                },
-                {
-                    "comment": "Assignment (must be after all compound operators)",
-                    "name": "keyword.operator.assignment.aria",
-                    "match": "\\+=|-=|\\*=|/=|%=|&=|\\|=|\\^=|<<=|>>=|=(?![=>])"
+                    "name": "string.quoted.backtick.aria",
+                    "begin": "`",
+                    "end": "`",
+                    "patterns": [
+                        {
+                            "name": "variable.other.interpolation.aria",
+                            "match": "&\\{[^}]+\\}"
+                        }
+                    ]
                 }
             ]
         },
-
-        "memory-qualifiers": {
+        "numbers": {
             "patterns": [
                 {
-                    "comment": "@wild, @gc, @stack, @wildx allocation qualifiers",
-                    "name": "meta.memory.qualifier.aria",
-                    "match": "(@)(wild|gc|stack|wildx)\\b",
-                    "captures": {
-                        "1": { "name": "keyword.operator.memory.aria" },
-                        "2": { "name": "keyword.other.memory-mode.aria" }
-                    }
-                }
-            ]
-        },
-
-        "constants": {
-            "patterns": [
+                    "name": "constant.numeric.hex.aria",
+                    "match": "\\b0[xX][0-9A-Fa-f_]+\\b"
+                },
+                {
+                    "name": "constant.numeric.binary.aria",
+                    "match": "\\b0[bB][01_]+\\b"
+                },
+                {
+                    "name": "constant.numeric.octal.aria",
+                    "match": "\\b0[oO][0-7_]+\\b"
+                },
+                {
+                    "name": "constant.numeric.float.aria",
+                    "match": "\\b[0-9][0-9_]*\\.[0-9][0-9_]*([eE][+-]?[0-9_]+)?\\b"
+                },
+                {
+                    "name": "constant.numeric.integer.aria",
+                    "match": "\\b[0-9][0-9_]*\\b"
+                },
                 {
                     "name": "constant.language.boolean.aria",
                     "match": "\\b(true|false)\\b"
+                }
+            ]
+        },
+        "operators": {
+            "patterns": [
+                {
+                    "comment": "Result/Option unwrap operators",
+                    "name": "keyword.operator.unwrap.aria",
+                    "match": "\\?!|\\?\\?|\\?"
                 },
                 {
-                    "comment": "NIL — Aria's absence-of-value type (NOT a null pointer)",
-                    "name": "constant.language.nil.aria",
-                    "match": "\\bNIL\\b"
+                    "name": "keyword.operator.comparison.aria",
+                    "match": "==|!=|<=|>=|<|>"
                 },
                 {
-                    "comment": "NULL — C-style null pointer constant for @ pointer types",
-                    "name": "constant.language.null.aria",
-                    "match": "\\bNULL\\b"
+                    "name": "keyword.operator.logical.aria",
+                    "match": "&&|\\|\\||!"
                 },
                 {
-                    "comment": "ERR — TBB/fix256 sticky error sentinel value",
-                    "name": "constant.language.error-sentinel.aria",
-                    "match": "\\bERR\\b"
+                    "name": "keyword.operator.arithmetic.aria",
+                    "match": "[+\\-*/%]"
                 },
                 {
-                    "comment": "unknown — soft-error propagating state (division by zero, OOB, etc.)",
-                    "name": "constant.language.unknown.aria",
-                    "match": "\\bunknown\\b"
+                    "name": "keyword.operator.bitwise.aria",
+                    "match": "&|\\||\\^|~|<<|>>"
+                },
+                {
+                    "name": "keyword.operator.assignment.aria",
+                    "match": "=|\\+=|-=|\\*=|/=|%=|&=|\\|=|\\^=|<<=|>>="
+                },
+                {
+                    "name": "keyword.operator.arrow.aria",
+                    "match": "->|=>"
+                },
+                {
+                    "name": "punctuation.separator.aria",
+                    "match": ":"
+                }
+            ]
+        },
+        "variables": {
+            "patterns": [
+                {
+                    "comment": "Type:name variable declaration pattern",
+                    "match": "\\b([A-Z][a-zA-Z0-9_]*)(:)([a-zA-Z_][a-zA-Z0-9_]*)",
+                    "captures": {
+                        "1": { "name": "storage.type.aria" },
+                        "2": { "name": "punctuation.separator.aria" },
+                        "3": { "name": "variable.other.declaration.aria" }
+                    }
+                },
+                {
+                    "comment": "Function call",
+                    "name": "entity.name.function.call.aria",
+                    "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*(?=\\()"
+                },
+                {
+                    "name": "variable.other.aria",
+                    "match": "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b"
                 }
             ]
         }
-
     }
 }
