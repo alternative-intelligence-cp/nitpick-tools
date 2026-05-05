@@ -24,7 +24,7 @@ Static safety audit tool for Aria source files. Written in C. Scans for `wild`/`
 
 ```bash
 cd aria-safety && make
-./aria-safety path/to/file.aria
+./aria-safety path/to/file.npk
 ./aria-safety --json path/to/project/   # JSON output
 ./aria-safety --summary path/to/project/# per-tag statistics
 ```
