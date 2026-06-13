@@ -6,7 +6,7 @@
             "    $0",
             "};"
         ],
-        "description": "Aria function declaration"
+        "description": "Nitpick function declaration"
     },
     "Public Function": {
         "prefix": "pubfunc",
@@ -15,7 +15,7 @@
             "    $0",
             "};"
         ],
-        "description": "Public Aria function"
+        "description": "Public Nitpick function"
     },
     "Failsafe Block": {
         "prefix": "failsafe",

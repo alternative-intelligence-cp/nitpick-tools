@@ -193,16 +193,16 @@
 
 ## Runtime Library Exception
 
-As a special exception, the copyright holders of the Aria runtime library
-give you permission to link the Aria runtime library with independent
+As a special exception, the copyright holders of the Nitpick runtime library
+give you permission to link the Nitpick runtime library with independent
 modules to produce an executable, regardless of the license terms of these
 independent modules, and to copy and distribute the resulting executable
 under terms of your choice, provided that you also meet, for each linked
 independent module, the terms and conditions of the license of that module.
 
-This exception does not apply to modifications of the Aria runtime library
+This exception does not apply to modifications of the Nitpick runtime library
 itself, which remain subject to the Apache License, Version 2.0.
 
-The intent of this exception is to allow programs compiled with the Aria
+The intent of this exception is to allow programs compiled with the Nitpick
 compiler to be distributed freely under any license, without the Apache
 License requirements applying to the compiled program as a whole.

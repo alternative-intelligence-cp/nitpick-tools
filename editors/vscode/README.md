@@ -1,6 +1,6 @@
-# Aria Language Support for VS Code
+# Nitpick Language Support for VS Code
 
-Rich language support for the [Aria programming language](https://github.com/aria-lang/aria) in Visual Studio Code.
+Rich language support for the [Nitpick programming language](https://github.com/nitpick-lang/nitpick) in Visual Studio Code.
 
 ## Features
 
@@ -28,34 +28,34 @@ Rich language support for the [Aria programming language](https://github.com/ari
 
 ## Requirements
 
-The extension bundles the Aria language server (`aria-ls`) for all platforms:
+The extension bundles the Nitpick language server (`nitpick-ls`) for all platforms:
 - Linux (x86_64)
 - macOS (Universal)
 - Windows (x86_64)
 
 Alternatively, you can:
-1. Install the Aria compiler from [releases](https://github.com/aria-lang/aria/releases)
-2. Build from source: `cd aria && cmake --build build`
+1. Install the Nitpick compiler from [releases](https://github.com/nitpick-lang/nitpick/releases)
+2. Build from source: `cd nitpick && cmake --build build`
 
 ## Extension Settings
 
 This extension contributes the following settings:
 
-* `aria.server.path`: Path to `aria-ls` executable (uses bundled binary if empty)
-* `aria.server.args`: Additional arguments to pass to the language server
-* `aria.trace.server`: Traces LSP communication (`off`, `messages`, `verbose`)
+* `nitpick.server.path`: Path to `nitpick-ls` executable (uses bundled binary if empty)
+* `nitpick.server.args`: Additional arguments to pass to the language server
+* `nitpick.trace.server`: Traces LSP communication (`off`, `messages`, `verbose`)
 
 ## Usage
 
 1. Install the extension
-2. Open any `.aria` file
+2. Open any `.npk` file
 3. The language server starts automatically
 4. Enjoy instant feedback!
 
-### Example Aria Code
+### Example Nitpick Code
 
-```aria
-// Aria with TBB types and memory safety
+```nitpick
+// Nitpick with TBB types and memory safety
 func:fibonacci = (n: tbb32) -> tbb32 {
     if (n <= 1) {
         return n;
@@ -81,13 +81,13 @@ defer {
 
 ### 0.2.0 (March 2026)
 
-- Updated to match Aria compiler v0.2.0
+- Updated to match Nitpick compiler v0.2.0
 
 ### 0.1.0 (December 2025)
 
 Initial release:
 - TextMate grammar for syntax highlighting
-- LSP integration with aria-ls
+- LSP integration with nitpick-ls
 - Real-time diagnostics
 - Hover and go-to-definition
 - Cross-platform bundled binaries
@@ -104,13 +104,13 @@ npm run compile
 
 ```bash
 npm run package
-# Produces: aria-lang-0.2.0.vsix
+# Produces: nitpick-lang-0.2.0.vsix
 ```
 
 ### Installing Locally
 
 ```bash
-code --install-extension aria-lang-0.2.0.vsix
+code --install-extension nitpick-lang-0.2.0.vsix
 ```
 
 ## Contributing
@@ -123,4 +123,4 @@ MIT License - see [LICENSE](../../LICENSE)
 
 ---
 
-**Enjoy coding in Aria!** 🚀
+**Enjoy coding in Nitpick!** 🚀

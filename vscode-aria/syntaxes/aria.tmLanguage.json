@@ -1,6 +1,6 @@
 {
     "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
-    "name": "Aria",
+    "name": "Nitpick",
     "scopeName": "source.aria",
     "patterns": [
         { "include": "#comments" },
@@ -58,7 +58,7 @@
             "patterns": [
                 {
                     "comment": "func:name pattern — highlights func as keyword and name as function",
-                    "match": "\\b((?:pub|priv|inline|noinline|async|comptime|extern)\\s+)*(func)(:)(\\w+)",
+                    "match": "\\b((?:pub|inline|noinline|async|comptime|extern)\\s+)*(func)(:)(\\w+)",
                     "captures": {
                         "1": { "name": "storage.modifier.aria" },
                         "2": { "name": "keyword.declaration.function.aria" },
@@ -143,14 +143,14 @@
         "borrow-annotations": {
             "patterns": [
                 {
-                    "comment": "$mut, $ref borrow annotations",
+                    "comment": "$$i (immutable borrow), $$m (mutable borrow)",
                     "name": "storage.modifier.borrow.aria",
-                    "match": "\\$(mut|ref)\\b"
+                    "match": "\\$\\$(i|m)\\b"
                 },
                 {
                     "comment": "$ as borrow/iteration variable",
                     "name": "variable.language.iterator.aria",
-                    "match": "\\$(?![a-zA-Z])"
+                    "match": "\\$(?![a-zA-Z$])"
                 }
             ]
         },
@@ -158,11 +158,11 @@
             "patterns": [
                 {
                     "name": "keyword.control.flow.aria",
-                    "match": "\\b(if|else|while|for|till|loop|when|then|end|pick|fall|break|continue|match|in)\\b"
+                    "match": "\\b(if|else|while|for|till|loop|when|then|end|pick|fall|break|continue|in)\\b"
                 },
                 {
                     "name": "keyword.control.return.aria",
-                    "match": "\\b(pass|fail|return)\\b"
+                    "match": "\\b(pass|fail|return|exit)\\b"
                 },
                 {
                     "name": "keyword.control.async.aria",
@@ -170,15 +170,15 @@
                 },
                 {
                     "name": "keyword.declaration.aria",
-                    "match": "\\b(func|struct|enum|trait|impl|opaque|mod)\\b"
+                    "match": "\\b(func|struct|enum|trait|impl|opaque|mod|Type|Rules)\\b"
                 },
                 {
                     "name": "storage.modifier.aria",
-                    "match": "\\b(pub|extern|const|fixed|comptime|inline|noinline|move|defer|dyn)\\b"
+                    "match": "\\b(pub|extern|const|fixed|comptime|inline|noinline|move|defer|dyn|macro|derive)\\b"
                 },
                 {
                     "name": "keyword.other.aria",
-                    "match": "\\b(use|as|is|cfg|requires|ensures|invariant)\\b"
+                    "match": "\\b(use|as|is|cfg|requires|ensures|invariant|prove|assert_static|limit)\\b"
                 },
                 {
                     "name": "keyword.memory.aria",
@@ -223,14 +223,14 @@
                     "match": "\\b(vec2|vec3|vec9|matrix|tmatrix|tensor|ttensor|array|binary)\\b"
                 },
                 {
-                    "comment": "Core types: bool, string, object, unknown",
+                    "comment": "Core types: bool, string, object, unknown, any, Result",
                     "name": "storage.type.core.aria",
-                    "match": "\\b(bool|string|obj|unknown)\\b"
+                    "match": "\\b(bool|string|obj|unknown|any|Result)\\b"
                 },
                 {
-                    "comment": "NIL constant (null equivalent)",
+                    "comment": "Special value constants: NIL, NULL, ERR",
                     "name": "constant.language.nil.aria",
-                    "match": "\\bNIL\\b"
+                    "match": "\\b(NIL|NULL|ERR)\\b"
                 }
             ]
         },
@@ -238,7 +238,17 @@
             "patterns": [
                 {
                     "name": "support.function.builtin.aria",
-                    "match": "\\b(print|println|eprint|eprintln|assert|sizeof|typeof|alignof)\\b"
+                    "match": "\\b(print|println|stderr_write|stddbg_write|stdout_write|stdin_read_line|stdin_read_all|assert|sizeof|typeof|alignof|offsetof)\\b"
+                },
+                {
+                    "comment": "Collection builtins: stack and hash table",
+                    "name": "support.function.collection.aria",
+                    "match": "\\b(astack|apush|apop|apeek|acap|asize|afits|atype|ahash|ahset|ahget|ahcount|ahsize|ahfits|ahtype|ahdelete|ahhas|ahclear|ahkeys)\\b"
+                },
+                {
+                    "comment": "@intrinsics: cast, sizeof, etc.",
+                    "name": "support.function.intrinsic.aria",
+                    "match": "@(?:cast|cast_unchecked|sizeof|alignof|typeof|offsetof|assert|likely|unlikely|prefetch|unreachable|breakpoint|trap|simd_\\w+)\\b"
                 }
             ]
         },
@@ -318,13 +328,13 @@
         "operators": {
             "patterns": [
                 {
-                    "comment": "Result/Option unwrap operators",
+                    "comment": "Result/Option unwrap and safe navigation operators",
                     "name": "keyword.operator.unwrap.aria",
-                    "match": "\\?!|\\?\\?|\\?"
+                    "match": "\\?!|\\?\\.|\\.\\?|\\?\\?|\\?"
                 },
                 {
                     "name": "keyword.operator.comparison.aria",
-                    "match": "==|!=|<=|>=|<|>"
+                    "match": "<=>|==|!=|<=|>=|<|>"
                 },
                 {
                     "name": "keyword.operator.logical.aria",
@@ -344,7 +354,11 @@
                 },
                 {
                     "name": "keyword.operator.arrow.aria",
-                    "match": "->|=>"
+                    "match": "->|<-|=>"
+                },
+                {
+                    "name": "keyword.operator.pipe.aria",
+                    "match": "\\|>|<\\|"
                 },
                 {
                     "name": "punctuation.separator.aria",

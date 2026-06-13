@@ -1,7 +1,7 @@
 {
     "name": "aria-language",
-    "displayName": "Aria Language Support",
-    "description": "Syntax highlighting and language support for the Aria programming language",
+    "displayName": "Nitpick Language Support",
+    "description": "Syntax highlighting and language support for the Nitpick programming language",
     "version": "0.2.13",
     "publisher": "alternative-intelligence",
     "repository": {
@@ -19,7 +19,7 @@
             {
                 "id": "aria",
                 "aliases": [
-                    "Aria",
+                    "Nitpick",
                     "aria"
                 ],
                 "extensions": [

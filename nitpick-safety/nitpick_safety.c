@@ -23,10 +23,10 @@
  *   (or: make)
  *
  * Usage:
- *   aria-safety file.aria [file.aria ...]
- *   aria-safety src/                          recursive directory scan
- *   aria-safety --json file.aria              JSON output
- *   aria-safety --summary src/                per-file summary stats
+ *   nitpick-safety file.npk [file.npk ...]
+ *   nitpick-safety src/                          recursive directory scan
+ *   nitpick-safety --json file.npk              JSON output
+ *   nitpick-safety --summary src/                per-file summary stats
  *
  * Exit codes: 0 = clean, 1 = findings present, 2 = usage/IO error
  *
@@ -373,7 +373,7 @@ static void scan_path(const char *path)
         scan_dir(path);
     } else if (S_ISREG(st.st_mode)) {
         size_t len = strlen(path);
-        if (len >= 5 && strcmp(path + len - 5, ".aria") == 0)
+        if (len >= 4 && strcmp(path + len - 4, ".npk") == 0)
             scan_file(path);
     }
 }
@@ -384,10 +384,10 @@ int main(int argc, char **argv)
 {
     if (argc < 2) {
         fprintf(stderr,
-            "aria-safety — static safety audit for Aria source files\n"
+            "nitpick-safety — static safety audit for Nitpick source files\n"
             "\n"
             "Usage:\n"
-            "  aria-safety [options] <path> [path ...]    path = .aria file or directory\n"
+            "  nitpick-safety [options] <path> [path ...]    path = .npk file or directory\n"
             "\n"
             "Options:\n"
             "  --json      Output findings as JSON array\n"
@@ -431,7 +431,7 @@ int main(int argc, char **argv)
 
     if (g_files_scanned == 0) {
         if (g_json_mode) printf("[]\n");
-        fprintf(stderr, "aria-safety: no .aria files found\n");
+        fprintf(stderr, "nitpick-safety: no .npk files found\n");
         return 2;
     }
 

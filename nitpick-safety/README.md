@@ -1,6 +1,6 @@
-# aria-safety
+# nitpick-safety
 
-Static safety audit tool for Aria source files. Pattern-match scanner that
+Static safety audit tool for Nitpick source files. Pattern-match scanner that
 surfaces constructs requiring manual review — not a replacement for careful
 code reading, but a fast first pass to find the places that need it.
 
@@ -13,23 +13,23 @@ make
 Or directly:
 
 ```
-gcc -O2 -Wall -Wextra -std=c99 -o aria-safety aria_safety.c
+gcc -O2 -Wall -Wextra -std=c99 -o nitpick-safety nitpick_safety.c
 ```
 
 ## Usage
 
 ```
-aria-safety file.aria             scan a single file
-aria-safety src/                  scan directory recursively
-aria-safety lib/std/ stdlib/      scan multiple paths
+nitpick-safety file.npk             scan a single file
+nitpick-safety src/                  scan directory recursively
+nitpick-safety lib/std/ stdlib/      scan multiple paths
 ```
 
 ## Output
 
 ```
-lib/std/mem.aria:42:  [WILD]     wild allocation — no GC safety; manual lifetime required
-lib/std/sync.aria:57: [WEAK_CAS] compare_exchange_weak — spurious failure possible; verify inside retry loop
-src/parser.aria:91:   [RAW]      raw() strips Result<T> — caller must handle failure explicitly
+lib/std/mem.npk:42:  [WILD]     wild allocation — no GC safety; manual lifetime required
+lib/std/sync.npk:57: [WEAK_CAS] compare_exchange_weak — spurious failure possible; verify inside retry loop
+src/parser.npk:91:   [RAW]      raw() strips Result<T> — caller must handle failure explicitly
 ```
 
 ## Finding Tags

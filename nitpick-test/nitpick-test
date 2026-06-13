@@ -1,0 +1,93 @@
+#!/usr/bin/env python3
+"""
+nitpick-test — Testing and Sanitizer wrapper for the Nitpick language
+
+This tool compiles a Nitpick program with AddressSanitizer (ASAN) and
+UndefinedBehaviorSanitizer (UBSAN) enabled, and runs it to catch memory
+and undefined behavior errors at runtime.
+
+Usage:
+  nitpick-test <file.npk> [args...]
+"""
+
+import sys
+import os
+import subprocess
+import tempfile
+from pathlib import Path
+import shutil
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: nitpick-test <file.npk> [args...]")
+        sys.exit(1)
+
+    input_file = Path(sys.argv[1]).resolve()
+    if not input_file.exists():
+        print(f"Error: file '{input_file}' not found.")
+        sys.exit(1)
+
+    program_args = sys.argv[2:]
+
+    script_dir = Path(__file__).resolve().parent
+    repo_root = script_dir.parent.parent
+    
+    npkc_bin = shutil.which("npkc") or (repo_root / "build" / "ariac")
+    if not npkc_bin or not Path(npkc_bin).exists():
+        # Fallback to the known nitpick path
+        npkc_bin = repo_root / "nitpick" / "build" / "npkc"
+    
+    if not npkc_bin or not Path(npkc_bin).exists():
+        print("Error: npkc binary not found. Please add it to your PATH.")
+        sys.exit(1)
+
+    runtime_lib = repo_root / "nitpick" / "build" / "libnitpick_runtime.a"
+    if not runtime_lib.exists():
+        print(f"Error: libnitpick_runtime.a not found at {runtime_lib}")
+        sys.exit(1)
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp_path = Path(tmpdir)
+        ll_file = tmp_path / "out.ll"
+        exe_file = tmp_path / "out_asan"
+
+        print(f"[nitpick-test] Compiling {input_file.name} to LLVM IR...")
+        npkc_cmd = [str(npkc_bin), str(input_file), "--emit-llvm", "-o", str(ll_file)]
+        res = subprocess.run(npkc_cmd, capture_output=True, text=True)
+        if res.returncode != 0:
+            print("npkc compilation failed:")
+            print(res.stderr)
+            sys.exit(1)
+
+        print(f"[nitpick-test] Instrumenting with ASAN/UBSAN via clang...")
+        clang_cmd = [
+            "clang++",
+            "-fsanitize=address,undefined",
+            "-fno-omit-frame-pointer",
+            "-O1",
+            "-g",
+            str(ll_file),
+            str(runtime_lib),
+            "-latomic",
+            "-o", str(exe_file)
+        ]
+        res = subprocess.run(clang_cmd, capture_output=True, text=True)
+        if res.returncode != 0:
+            print("clang instrumentation failed:")
+            print(res.stderr)
+            sys.exit(1)
+
+        print(f"[nitpick-test] Running instrumented binary...\n")
+        run_cmd = [str(exe_file)] + program_args
+        
+        # Run with ASAN_OPTIONS=detect_leaks=1
+        env = os.environ.copy()
+        env["ASAN_OPTIONS"] = "detect_leaks=1,strict_string_checks=1,detect_stack_use_after_return=1"
+        
+        res = subprocess.run(run_cmd, env=env)
+        
+        print(f"\n[nitpick-test] Process exited with code {res.returncode}")
+        sys.exit(res.returncode)
+
+if __name__ == "__main__":
+    main()

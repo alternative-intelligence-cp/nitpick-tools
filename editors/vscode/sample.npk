@@ -169,11 +169,67 @@ func:greet = NIL(string:name, int32:age) {
 // ── Generic types ─────────────────────────────────────────────────────────────
 // Result<T>, Handle<T>, arena<T>, atomic<T>, simd<T,N>, quantum<T>, complex<T>
 
+// ── Design by Contract ────────────────────────────────────────────────────────
+func:contract_demo = int32(int32:x)
+    requires (x > 0i32)
+    ensures  ($ > 0i32)
+{
+    pass(x * 2i32);
+};
+
+// ── Rules / Limit constraints ─────────────────────────────────────────────────
+Rules:Percentage = {
+    $ >= 0i32,
+    $ <= 100i32
+};
+
+func:constrained_demo = NIL() {
+    limit<Percentage> int32:score = 85i32;
+    pass(NIL);
+};
+
+// ── Borrow annotations ───────────────────────────────────────────────────────
+// $$i = immutable borrow, $$m = mutable borrow
+func:borrow_demo = NIL($$i int32:read_only, $$m int32:mutable_ref) {
+    pass(NIL);
+};
+
+// ── Type declarations ─────────────────────────────────────────────────────────
+Type:Counter = {
+    int64:value;
+
+    pub func:increment = NIL(int64:self) {
+        pass(NIL);
+    };
+};
+
+// ── Cast and intrinsics ───────────────────────────────────────────────────────
+func:intrinsic_demo = NIL() {
+    int32:x = 42i32;
+    flt64:f = @cast<flt64>(x);
+    int64:sz = @sizeof(int32);
+    int64:al = @alignof(flt64);
+
+    // Collection builtins
+    astack(16i32);
+    apush(42i32);
+    int32:top = apeek();
+
+    // Pipe operators
+    // int32:result = get_data() |> transform() |> validate();
+
+    // Special constants
+    if (x == NULL) { exit(1i32); }
+
+    pass(NIL);
+};
+
 // ── Failsafe — MANDATORY in every Aria program ───────────────────────────────
 // Triggered by ?! unwrap failure, unhandled fail(), or system fault
-func:failsafe = NIL(int32:code) {
-    drop(printf("failsafe triggered: %d\n", code));
-    pass(NIL);
+// Must return int32, take tbb32 param, and call exit (never pass)
+func:failsafe = int32(tbb32:err_code) {
+    drop(printf("failsafe triggered: %d\n", @cast<int32>(err_code)));
+    exit(1i32);
 };
 
 // ── Entry point ───────────────────────────────────────────────────────────────
@@ -184,9 +240,11 @@ func:main = int32() {
     drop(raw(numeric_demo()));
     drop(raw(loops_demo()));
     drop(raw(memory_demo()));
+    drop(raw(constrained_demo()));
+    drop(raw(intrinsic_demo()));
 
     int32:sum = raw(add(21i32, 21i32));
     drop(printf("21 + 21 = %d\n", sum));
 
-    pass(0i32);
+    exit(0i32);
 };

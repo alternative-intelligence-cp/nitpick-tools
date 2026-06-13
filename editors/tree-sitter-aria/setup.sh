@@ -1,9 +1,9 @@
 #!/bin/bash
-# Setup script for Tree-sitter Aria grammar
+# Setup script for Tree-sitter Nitpick grammar
 
 set -e
 
-echo "Setting up Tree-sitter Aria grammar..."
+echo "Setting up Tree-sitter Nitpick grammar..."
 
 # Check for npm
 if ! command -v npm &> /dev/null; then
@@ -30,9 +30,9 @@ echo "Running tests..."
 tree-sitter test
 
 echo ""
-echo "✓ Tree-sitter Aria grammar setup complete!"
+echo "✓ Tree-sitter Nitpick grammar setup complete!"
 echo ""
 echo "Next steps:"
 echo "  - For Neovim: Follow installation instructions in README.md"
-echo "  - For Helix: Run 'tree-sitter build -o libtree-sitter-aria.so'"
-echo "  - Test parsing: tree-sitter parse ../vscode/sample.aria"
+echo "  - For Helix: Run 'tree-sitter build -o libtree-sitter-nitpick.so'"
+echo "  - Test parsing: tree-sitter parse ../vscode/sample.npk"

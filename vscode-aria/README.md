@@ -1,10 +1,10 @@
-# Aria Language Support for VS Code
+# Nitpick Language Support for VS Code
 
-Syntax highlighting and language support for the [Aria programming language](https://github.com/alternative-intelligence-cp/aria).
+Syntax highlighting and language support for the [Nitpick programming language](https://github.com/alternative-intelligence-cp/nitpick).
 
 ## Features
 
-- **Syntax Highlighting**: Full syntax highlighting for Aria source files (`.aria`)
+- **Syntax Highlighting**: Full syntax highlighting for Nitpick source files (`.npk`)
 - **Auto-closing**: Automatic closing of brackets, quotes, and parentheses
 - **Comment Support**: Line (`//`) and block (`/* */`) comments
 - **Bracket Matching**: Matching and folding for code blocks
@@ -13,7 +13,7 @@ Syntax highlighting and language support for the [Aria programming language](htt
 
 - Keywords: `if`, `else`, `while`, `for`, `return`, `break`, `continue`, `defer`, `fall`, `pick`, `case`, `default`, `label`, `goto`, `func`, `wild`, `const`, `auto`, `mod`, `pub`, `use`, `as`, `result`
 - Types: `int8`, `int16`, `int32`, `int64`, `uint8`, `uint16`, `uint32`, `uint64`, `float32`, `float64`, `bool`, `void`, `string`
-- Built-in functions: `print`, `aria.alloc`, `aria.free`, `aria.realloc`, `aria.strlen`, `aria.strcmp`, `aria.strcpy`, `aria.strcat`
+- Built-in functions: `print`, `nitpick.alloc`, `nitpick.free`, `nitpick.realloc`, `nitpick.strlen`, `nitpick.strcmp`, `nitpick.strcpy`, `nitpick.strcat`
 - String interpolation with backticks: `` `Hello ${name}` ``
 - Numeric literals: decimal, hex (`0x`), binary (`0b`), octal (`0o`), floats
 - Comments: `//` line comments and `/* */` block comments
@@ -22,21 +22,21 @@ Syntax highlighting and language support for the [Aria programming language](htt
 
 ### From Source
 
-1. Clone the Aria repository
-2. Navigate to `vscode-aria/`
+1. Clone the Nitpick repository
+2. Navigate to `vscode-nitpick/`
 3. Run `code --install-extension .` (or copy to `~/.vscode/extensions/`)
 
 ### Manual Installation
 
-Copy the `vscode-aria` folder to:
-- **Linux/macOS**: `~/.vscode/extensions/aria-language-0.0.1/`
-- **Windows**: `%USERPROFILE%\.vscode\extensions\aria-language-0.0.1\`
+Copy the `vscode-nitpick` folder to:
+- **Linux/macOS**: `~/.vscode/extensions/nitpick-language-0.0.1/`
+- **Windows**: `%USERPROFILE%\.vscode\extensions\nitpick-language-0.0.1\`
 
 Then reload VS Code.
 
-## About Aria
+## About Nitpick
 
-Aria is a systems programming language designed for clarity, safety, and performance. It features:
+Nitpick is a systems programming language designed for clarity, safety, and performance. It features:
 
 - Clean syntax with type annotations
 - Pattern matching with `pick`/`fall`
@@ -45,7 +45,7 @@ Aria is a systems programming language designed for clarity, safety, and perform
 - String interpolation with backticks
 - Recursive function support
 
-Learn more at [github.com/alternative-intelligence-cp/aria](https://github.com/alternative-intelligence-cp/aria)
+Learn more at [github.com/alternative-intelligence-cp/nitpick](https://github.com/alternative-intelligence-cp/nitpick)
 
 ## License
 

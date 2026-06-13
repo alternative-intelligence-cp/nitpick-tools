@@ -1,13 +1,13 @@
 {
-    "name": "aria-lang",
-    "displayName": "Aria Language Support",
-    "description": "Language support for Aria - a systems programming language with TBB arithmetic and hybrid memory model",
+    "name": "nitpick-lang",
+    "displayName": "Nitpick Language Support",
+    "description": "Language support for Nitpick - a systems programming language with TBB arithmetic and hybrid memory model",
     "version": "0.2.16",
-    "publisher": "aria-lang",
+    "publisher": "nitpick-lang",
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/aria-lang/aria"
+        "url": "https://github.com/alternative-intelligence-cp/nitpick"
     },
     "engines": {
         "vscode": "^1.80.0"
@@ -32,17 +32,24 @@
             {
                 "id": "aria",
                 "aliases": [
-                    "Aria",
+                    "Nitpick",
                     "aria"
                 ],
                 "extensions": [
-                    ".aria"
+                    ".aria",
+                    ".npk"
                 ],
                 "configuration": "./language-configuration.json",
                 "icon": {
                     "light": "./icons/aria-icon.png",
                     "dark": "./icons/aria-icon.png"
                 }
+            }
+        ],
+        "commands": [
+            {
+                "command": "nitpick.initProject",
+                "title": "Nitpick: Initialize Project"
             }
         ],
         "grammars": [
@@ -54,19 +61,19 @@
         ],
         "configuration": {
             "type": "object",
-            "title": "Aria Language Server",
+            "title": "Nitpick Language Server",
             "properties": {
-                "aria.server.path": {
+                "nitpick.server.path": {
                     "type": "string",
                     "default": "",
-                    "description": "Path to aria-ls executable. If empty, uses bundled binary."
+                    "description": "Path to nitpick-ls executable. If empty, uses bundled binary."
                 },
-                "aria.server.args": {
+                "nitpick.server.args": {
                     "type": "array",
                     "default": [],
-                    "description": "Additional arguments to pass to aria-ls"
+                    "description": "Additional arguments to pass to nitpick-ls"
                 },
-                "aria.trace.server": {
+                "nitpick.trace.server": {
                     "type": "string",
                     "enum": [
                         "off",
@@ -76,22 +83,22 @@
                     "default": "off",
                     "description": "Traces the communication between VS Code and the language server"
                 },
-                "aria.debugger.path": {
+                "nitpick.debugger.path": {
                     "type": "string",
                     "default": "",
-                    "description": "Path to aria-dap executable. If empty, uses bundled binary or system PATH."
+                    "description": "Path to nitpick-dap executable. If empty, uses bundled binary or system PATH."
                 },
-                "aria.compiler.path": {
+                "nitpick.compiler.path": {
                     "type": "string",
                     "default": "",
-                    "description": "Path to ariac executable. If empty, uses system PATH."
+                    "description": "Path to npkc executable. If empty, uses system PATH."
                 }
             }
         },
         "debuggers": [
             {
                 "type": "aria",
-                "label": "Aria Debug",
+                "label": "Nitpick Debug",
                 "languages": [
                     "aria"
                 ],
@@ -103,7 +110,7 @@
                         "properties": {
                             "program": {
                                 "type": "string",
-                                "description": "Absolute path to the Aria program executable to debug.",
+                                "description": "Absolute path to the Nitpick program executable to debug.",
                                 "default": "${workspaceFolder}/build/${fileBasenameNoExtension}"
                             },
                             "source": {
@@ -141,7 +148,7 @@
                     {
                         "type": "aria",
                         "request": "launch",
-                        "name": "Debug Aria Program",
+                        "name": "Debug Nitpick Program",
                         "program": "${workspaceFolder}/build/${fileBasenameNoExtension}",
                         "source": "${file}",
                         "stopOnEntry": false,
@@ -150,8 +157,8 @@
                 ],
                 "configurationSnippets": [
                     {
-                        "label": "Aria: Debug Program",
-                        "description": "Launch and debug an Aria program",
+                        "label": "Nitpick: Debug Program",
+                        "description": "Launch and debug an Nitpick program",
                         "body": {
                             "type": "aria",
                             "request": "launch",

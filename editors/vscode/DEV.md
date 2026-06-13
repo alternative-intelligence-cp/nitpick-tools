@@ -1,6 +1,6 @@
-# Aria VS Code Extension
+# Nitpick VS Code Extension
 
-This directory contains the Visual Studio Code extension for Aria language support.
+This directory contains the Visual Studio Code extension for Nitpick language support.
 
 ## Quick Start
 
@@ -22,7 +22,7 @@ npm run package
 
 1. Open this folder in VS Code
 2. Press F5 to launch Extension Development Host
-3. Open an `.aria` file
+3. Open an `.npk` file
 4. Verify syntax highlighting and LSP features
 
 ## Directory Structure
@@ -32,11 +32,11 @@ vscode/
 ├── src/
 │   └── extension.ts          # Main extension code
 ├── syntaxes/
-│   └── aria.tmLanguage.json  # TextMate grammar
+│   └── nitpick.tmLanguage.json  # TextMate grammar
 ├── bin/                       # Bundled binaries (copy from build/)
-│   ├── linux/aria-ls
-│   ├── macos/aria-ls
-│   └── windows/aria-ls.exe
+│   ├── linux/nitpick-ls
+│   ├── macos/nitpick-ls
+│   └── windows/nitpick-ls.exe
 ├── icons/                     # Extension icons
 ├── package.json               # Extension manifest
 ├── language-configuration.json
@@ -44,31 +44,31 @@ vscode/
 └── README.md
 ```
 
-## Bundling aria-ls
+## Bundling nitpick-ls
 
 To bundle the language server binary:
 
 ```bash
-# From aria root
+# From nitpick root
 mkdir -p editors/vscode/bin/linux
 mkdir -p editors/vscode/bin/macos
 mkdir -p editors/vscode/bin/windows
 
 # Linux
-cp build/aria-ls editors/vscode/bin/linux/
+cp build/nitpick-ls editors/vscode/bin/linux/
 
 # macOS (if you have a Mac or cross-compiler)
-# cp build/aria-ls editors/vscode/bin/macos/
+# cp build/nitpick-ls editors/vscode/bin/macos/
 
 # Windows (if you have cross-compiler)
-# cp build/aria-ls.exe editors/vscode/bin/windows/
+# cp build/nitpick-ls.exe editors/vscode/bin/windows/
 ```
 
 ## Publishing
 
 ```bash
 # Login to VS Code marketplace
-vsce login aria-lang
+vsce login nitpick-lang
 
 # Publish
 vsce publish

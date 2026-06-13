@@ -1,7 +1,7 @@
 CC      = gcc
 CFLAGS  = -O2 -Wall -Wextra -std=c99
-TARGET  = aria-safety
-SRC     = aria_safety.c
+TARGET  = nitpick-safety
+SRC     = nitpick_safety.c
 
 $(TARGET): $(SRC)
 	$(CC) $(CFLAGS) -o $(TARGET) $(SRC)

@@ -1,10 +1,10 @@
-# Tree-sitter Grammar for Aria
+# Tree-sitter Grammar for Nitpick
 
-Tree-sitter parser for the Aria programming language, providing structural syntax trees for modern editors.
+Tree-sitter parser for the Nitpick programming language, providing structural syntax trees for modern editors.
 
 ## Features
 
-- **Full Aria syntax support**: TBB types, hybrid memory model, string interpolation, pattern matching
+- **Full Nitpick syntax support**: TBB types, hybrid memory model, string interpolation, pattern matching
 - **Incremental parsing**: Efficient re-parsing on edits
 - **Error recovery**: Partial parse trees even with syntax errors
 - **Query system**: Syntax highlighting, code navigation, textobjects
@@ -18,8 +18,8 @@ Tree-sitter parser for the Aria programming language, providing structural synta
 
 ```bash
 cd ~/.local/share/nvim/site/pack/tree-sitter/start/
-git clone https://github.com/ailp/tree-sitter-aria
-cd tree-sitter-aria
+git clone https://github.com/ailp/tree-sitter-nitpick
+cd tree-sitter-nitpick
 npm install
 npm run generate
 ```
@@ -29,7 +29,7 @@ npm run generate
 ```lua
 -- ~/.config/nvim/init.lua or ~/.config/nvim/lua/treesitter.lua
 require'nvim-treesitter.configs'.setup {
-  ensure_installed = { "aria" },
+  ensure_installed = { "nitpick" },
   highlight = {
     enable = true,
   },
@@ -55,12 +55,12 @@ require'nvim-treesitter.configs'.setup {
 
 ```lua
 local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
-parser_config.aria = {
+parser_config.npk = {
   install_info = {
-    url = "~/.local/share/nvim/site/pack/tree-sitter/start/tree-sitter-aria",
+    url = "~/.local/share/nvim/site/pack/tree-sitter/start/tree-sitter-nitpick",
     files = {"src/parser.c"},
   },
-  filetype = "aria",
+  filetype = "nitpick",
 }
 ```
 
@@ -69,38 +69,38 @@ parser_config.aria = {
 1. Build the grammar:
 
 ```bash
-cd editors/tree-sitter-aria
+cd editors/tree-sitter-nitpick
 tree-sitter generate
-tree-sitter build -o libtree-sitter-aria.so
+tree-sitter build -o libtree-sitter-nitpick.so
 ```
 
 2. Copy files to Helix runtime:
 
 ```bash
 # Linux/macOS
-mkdir -p ~/.config/helix/runtime/grammars/sources/aria
-cp -r . ~/.config/helix/runtime/grammars/sources/aria/
-cp libtree-sitter-aria.so ~/.config/helix/runtime/grammars/
-cp -r queries ~/.config/helix/runtime/queries/aria/
+mkdir -p ~/.config/helix/runtime/grammars/sources/nitpick
+cp -r . ~/.config/helix/runtime/grammars/sources/nitpick/
+cp libtree-sitter-nitpick.so ~/.config/helix/runtime/grammars/
+cp -r queries ~/.config/helix/runtime/queries/nitpick/
 ```
 
 3. Add to `~/.config/helix/languages.toml`:
 
 ```toml
 [[language]]
-name = "aria"
-scope = "source.aria"
-file-types = ["aria"]
-roots = ["aria.toml"]
+name = "nitpick"
+scope = "source.npk"
+file-types = ["nitpick"]
+roots = ["nitpick.toml"]
 comment-token = "//"
 indent = { tab-width = 2, unit = "  " }
 
 [language-server]
-command = "aria-ls"
+command = "nitpick-ls"
 
 [[grammar]]
-name = "aria"
-source = { path = "~/.config/helix/runtime/grammars/sources/aria" }
+name = "nitpick"
+source = { path = "~/.config/helix/runtime/grammars/sources/nitpick" }
 ```
 
 ## Development
@@ -124,7 +124,7 @@ tree-sitter test
 ### Parsing Examples
 
 ```bash
-tree-sitter parse examples/sample.aria
+tree-sitter parse examples/sample.npk
 ```
 
 ## Queries
@@ -143,7 +143,7 @@ The grammar is defined in `grammar.js` following Tree-sitter's DSL:
 - **Statements**: Functions, structs, variables, control flow
 - **Types**: TBB types, memory qualifiers, generics
 
-Precedence levels match Aria's language spec for correct operator binding.
+Precedence levels match Nitpick's language spec for correct operator binding.
 
 ## Contributing
 
@@ -160,7 +160,7 @@ MIT
 
 ## Links
 
-- [Aria Compiler](https://github.com/ailp/aria)
+- [Nitpick Compiler](https://github.com/ailp/nitpick)
 - [Tree-sitter Documentation](https://tree-sitter.github.io/tree-sitter/)
 - [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter)
 - [Helix Editor](https://helix-editor.com/)

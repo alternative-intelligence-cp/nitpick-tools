@@ -1,51 +1,51 @@
-# Contributing to Aria Tools
+# Contributing to Nitpick Tools
 
-Thank you for your interest in improving Aria's developer tooling!
+Thank you for your interest in improving Nitpick's developer tooling!
 
 ## Repository Contents
 
-- **aria-safety/** — Static safety audit tool (C)
-- **aria-mcp/** — MCP server for AI-assisted Aria coding (Python)
-- **vscode-aria/** — VS Code extension (TextMate grammar, JSON)
-- **tree-sitter-aria/** — Tree-sitter grammar
+- **nitpick-safety/** — Static safety audit tool (C)
+- **nitpick-mcp/** — MCP server for AI-assisted Nitpick coding (Python)
+- **vscode-nitpick/** — VS Code extension (TextMate grammar, JSON)
+- **tree-sitter-nitpick/** — Tree-sitter grammar
 - **emacs/** — Emacs major mode
 
 ## Getting Started
 
 1. Fork the repository
-2. Clone: `git clone https://github.com/<your-username>/aria-tools.git`
+2. Clone: `git clone https://github.com/<your-username>/nitpick-tools.git`
 3. Create a branch: `git checkout -b feature/your-change`
 4. Make your changes
 5. Push and open a Pull Request
 
 ## VS Code Extension
 
-The extension lives in `vscode-aria/`. To test changes:
+The extension lives in `vscode-nitpick/`. To test changes:
 
-1. Open `vscode-aria/` in VS Code
+1. Open `vscode-nitpick/` in VS Code
 2. Press `F5` to launch the Extension Development Host
-3. Open an `.aria` file to test syntax highlighting
+3. Open an `.npk` file to test syntax highlighting
 
-The TextMate grammar is in `syntaxes/aria.tmLanguage.json`. Key scopes:
+The TextMate grammar is in `syntaxes/nitpick.tmLanguage.json`. Key scopes:
 - Keywords: `func:`, `failsafe`, `pass()`, `fail()`, `till`, `use`
 - Types: `int8`–`int128`, `flt32`/`flt64`, `str`, `bool`, `NIL`
 - Preprocessor: `%define`, `%macro`, `%ifdef`, `%include`
 - Compile-time: `comptime`, `inline`, `noinline`
 
-## aria-safety (C)
+## nitpick-safety (C)
 
 ```bash
-cd aria-safety
+cd nitpick-safety
 make
-./aria-safety ../path/to/file.aria
+./nitpick-safety ../path/to/file.npk
 ```
 
-## aria-mcp (Python)
+## nitpick-mcp (Python)
 
 ```bash
-cd aria-mcp
+cd nitpick-mcp
 pip install -r requirements.txt
-python aria_mcp_server.py
+python nitpick_mcp_server.py
 ```
 
 ## Commit Messages

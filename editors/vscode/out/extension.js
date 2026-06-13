@@ -42,7 +42,7 @@ const vscode_1 = require("vscode");
 const node_1 = require("vscode-languageclient/node");
 let client;
 function activate(context) {
-    console.log('Aria language extension activating...');
+    console.log('Nitpick language extension activating...');
     // Get server path from configuration or use bundled binary
     const serverPath = getServerPath(context);
     if (!serverPath || !fs.existsSync(serverPath)) {
@@ -64,7 +64,7 @@ function activate(context) {
             options: {
                 env: {
                     ...process.env,
-                    RUST_LOG: 'debug' // If we add logging
+                    ARIA_LS_LOG: 'debug' // LSP server log level
                 }
             }
         }
@@ -87,11 +87,37 @@ function activate(context) {
     client = new node_1.LanguageClient('ariaLanguageServer', 'Aria Language Server', serverOptions, clientOptions);
     // Start the client (will also launch the server)
     client.start();
-    console.log('Aria language server started');
+    console.log('Nitpick language server started');
+    // Register project init command
+    const initCmd = vscode_1.commands.registerCommand('nitpick.initProject', async () => {
+        const folders = vscode_1.workspace.workspaceFolders;
+        if (!folders || folders.length === 0) {
+            vscode_1.window.showErrorMessage('Please open a folder in VS Code first.');
+            return;
+        }
+        const rootPath = folders[0].uri.fsPath;
+        const srcDir = path.join(rootPath, 'src');
+        if (!fs.existsSync(srcDir))
+            fs.mkdirSync(srcDir);
+        const mainFile = path.join(srcDir, 'main.npk');
+        if (!fs.existsSync(mainFile)) {
+            fs.writeFileSync(mainFile, 'pub func:main = int32() {\n    println("Hello, Nitpick!");\n    return 0i32;\n};\n');
+        }
+        const tomlFile = path.join(rootPath, 'nitpick-package.toml');
+        if (!fs.existsSync(tomlFile)) {
+            fs.writeFileSync(tomlFile, '[package]\nname = "my_project"\nversion = "0.1.0"\n');
+        }
+        const gitignore = path.join(rootPath, '.gitignore');
+        if (!fs.existsSync(gitignore)) {
+            fs.writeFileSync(gitignore, '/build\n');
+        }
+        vscode_1.window.showInformationMessage('Nitpick project initialized!');
+    });
+    context.subscriptions.push(initCmd);
     // Register debug adapter
     const debugAdapterFactory = new AriaDebugAdapterFactory(context);
     context.subscriptions.push(vscode_1.debug.registerDebugAdapterDescriptorFactory('aria', debugAdapterFactory), vscode_1.debug.registerDebugConfigurationProvider('aria', new AriaDebugConfigurationProvider(context)));
-    console.log('Aria debug adapter registered');
+    console.log('Nitpick debug adapter registered');
 }
 function deactivate() {
     if (!client) {
@@ -109,7 +135,7 @@ function deactivate() {
  */
 function getServerPath(context) {
     // Check user configuration first
-    const configPath = vscode_1.workspace.getConfiguration('aria').get('server.path');
+    const configPath = vscode_1.workspace.getConfiguration('nitpick').get('server.path');
     if (configPath && configPath.trim() !== '') {
         return configPath;
     }
@@ -176,7 +202,7 @@ function findInPath(executable) {
  */
 function getDebugAdapterPath(context) {
     // Check user configuration
-    const configPath = vscode_1.workspace.getConfiguration('aria').get('debugger.path');
+    const configPath = vscode_1.workspace.getConfiguration('nitpick').get('debugger.path');
     if (configPath && configPath.trim() !== '') {
         return configPath;
     }
@@ -207,7 +233,7 @@ function getDebugAdapterPath(context) {
  * Get the path to ariac compiler
  */
 function getCompilerPath(context) {
-    const configPath = vscode_1.workspace.getConfiguration('aria').get('compiler.path');
+    const configPath = vscode_1.workspace.getConfiguration('nitpick').get('compiler.path');
     if (configPath && configPath.trim() !== '') {
         return configPath;
     }

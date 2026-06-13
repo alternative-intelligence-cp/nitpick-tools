@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as cp from 'child_process';
-import { ExtensionContext, window, workspace, debug, DebugAdapterDescriptorFactory, DebugSession, DebugAdapterDescriptor, DebugAdapterExecutable, DebugConfiguration, CancellationToken, ProviderResult, WorkspaceFolder, DebugConfigurationProvider } from 'vscode';
+import { ExtensionContext, commands, window, workspace, debug, DebugAdapterDescriptorFactory, DebugSession, DebugAdapterDescriptor, DebugAdapterExecutable, DebugConfiguration, CancellationToken, ProviderResult, WorkspaceFolder, DebugConfigurationProvider } from 'vscode';
 import {
     LanguageClient,
     LanguageClientOptions,
@@ -12,7 +12,7 @@ import {
 let client: LanguageClient | undefined;
 
 export function activate(context: ExtensionContext) {
-    console.log('Aria language extension activating...');
+    console.log('Nitpick language extension activating...');
 
     // Get server path from configuration or use bundled binary
     const serverPath = getServerPath(context);
@@ -71,7 +71,38 @@ export function activate(context: ExtensionContext) {
     // Start the client (will also launch the server)
     client.start();
 
-    console.log('Aria language server started');
+    console.log('Nitpick language server started');
+
+    // Register project init command
+    const initCmd = commands.registerCommand('nitpick.initProject', async () => {
+        const folders = workspace.workspaceFolders;
+        if (!folders || folders.length === 0) {
+            window.showErrorMessage('Please open a folder in VS Code first.');
+            return;
+        }
+        const rootPath = folders[0].uri.fsPath;
+        
+        const srcDir = path.join(rootPath, 'src');
+        if (!fs.existsSync(srcDir)) fs.mkdirSync(srcDir);
+        
+        const mainFile = path.join(srcDir, 'main.npk');
+        if (!fs.existsSync(mainFile)) {
+            fs.writeFileSync(mainFile, 'pub func:main = int32() {\n    println("Hello, Nitpick!");\n    return 0i32;\n};\n');
+        }
+
+        const tomlFile = path.join(rootPath, 'nitpick-package.toml');
+        if (!fs.existsSync(tomlFile)) {
+            fs.writeFileSync(tomlFile, '[package]\nname = "my_project"\nversion = "0.1.0"\n');
+        }
+
+        const gitignore = path.join(rootPath, '.gitignore');
+        if (!fs.existsSync(gitignore)) {
+            fs.writeFileSync(gitignore, '/build\n');
+        }
+
+        window.showInformationMessage('Nitpick project initialized!');
+    });
+    context.subscriptions.push(initCmd);
 
     // Register debug adapter
     const debugAdapterFactory = new AriaDebugAdapterFactory(context);
@@ -80,7 +111,7 @@ export function activate(context: ExtensionContext) {
         debug.registerDebugConfigurationProvider('aria', new AriaDebugConfigurationProvider(context))
     );
 
-    console.log('Aria debug adapter registered');
+    console.log('Nitpick debug adapter registered');
 }
 
 export function deactivate(): Thenable<void> | undefined {
@@ -100,7 +131,7 @@ export function deactivate(): Thenable<void> | undefined {
  */
 function getServerPath(context: ExtensionContext): string | undefined {
     // Check user configuration first
-    const configPath = workspace.getConfiguration('aria').get<string>('server.path');
+    const configPath = workspace.getConfiguration('nitpick').get<string>('server.path');
     if (configPath && configPath.trim() !== '') {
         return configPath;
     }
@@ -181,7 +212,7 @@ function findInPath(executable: string): string | undefined {
  */
 function getDebugAdapterPath(context: ExtensionContext): string | undefined {
     // Check user configuration
-    const configPath = workspace.getConfiguration('aria').get<string>('debugger.path');
+    const configPath = workspace.getConfiguration('nitpick').get<string>('debugger.path');
     if (configPath && configPath.trim() !== '') {
         return configPath;
     }
@@ -207,7 +238,7 @@ function getDebugAdapterPath(context: ExtensionContext): string | undefined {
  * Get the path to ariac compiler
  */
 function getCompilerPath(context: ExtensionContext): string | undefined {
-    const configPath = workspace.getConfiguration('aria').get<string>('compiler.path');
+    const configPath = workspace.getConfiguration('nitpick').get<string>('compiler.path');
     if (configPath && configPath.trim() !== '') {
         return configPath;
     }

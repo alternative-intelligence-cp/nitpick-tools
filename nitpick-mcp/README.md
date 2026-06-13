@@ -1,10 +1,10 @@
-# aria-mcp
+# nitpick-mcp
 
-MCP (Model Context Protocol) server for the Aria language toolchain.
-Exposes `aria_compile`, `aria_check`, `aria_docs`, `aria_format`, and
-`aria_ask` as MCP tools so any MCP-capable AI assistant can compile,
-audit, format, and answer questions about Aria code directly within a
-conversation. Also exposes `aria_ref.md` sections as MCP resources.
+MCP (Model Context Protocol) server for the Nitpick language toolchain.
+Exposes `nitpick_compile`, `nitpick_check`, `nitpick_docs`, `nitpick_format`, and
+`nitpick_ask` as MCP tools so any MCP-capable AI assistant can compile,
+audit, format, and answer questions about Nitpick code directly within a
+conversation. Also exposes `nitpick_ref.md` sections as MCP resources.
 
 **Zero external dependencies** — pure Python 3.8+ stdlib.
 
@@ -12,13 +12,13 @@ conversation. Also exposes `aria_ref.md` sections as MCP resources.
 
 | Tool | What it does |
 |------|-------------|
-| `aria_compile(source)` | Compile Aria source via `ariac`; returns `{ success, errors[], warnings[], output }` |
-| `aria_check(source)` | Run `aria-safety` audit; returns `{ issues: [{ line, tag, message }] }` |
-| `aria_docs(query)` | Section-level search over `aria_ref.md`; returns matching excerpts |
-| `aria_format(source)` | Basic indentation/whitespace normalizer |
-| `aria_ask(question[, context])` | Query the Aria specialist fine-tuned model (optional; set `ARIA_ASK_DISABLED=1` to hide) |
+| `nitpick_compile(source)` | Compile Nitpick source via `nitpickc`; returns `{ success, errors[], warnings[], output }` |
+| `nitpick_check(source)` | Run `nitpick-safety` audit; returns `{ issues: [{ line, tag, message }] }` |
+| `nitpick_docs(query)` | Section-level search over `nitpick_ref.md`; returns matching excerpts |
+| `nitpick_format(source)` | Basic indentation/whitespace normalizer |
+| `nitpick_ask(question[, context])` | Query the Nitpick specialist fine-tuned model (optional; set `ARIA_ASK_DISABLED=1` to hide) |
 
-### aria_compile
+### nitpick_compile
 
 ```json
 { "source": "func:main = void() { stdout.write(`hello`); }" }
@@ -27,10 +27,10 @@ conversation. Also exposes `aria_ref.md` sections as MCP resources.
 { "success": true, "errors": [], "warnings": [], "output": "" }
 ```
 
-### aria_check
+### nitpick_check
 
 ```json
-{ "source": "wild int32*:p = aria.alloc(64);" }
+{ "source": "wild int32*:p = nitpick.alloc(64);" }
 ```
 ```json
 {
@@ -40,12 +40,12 @@ conversation. Also exposes `aria_ref.md` sections as MCP resources.
 }
 ```
 
-### aria_docs
+### nitpick_docs
 
 ```json
 { "query": "result propagation" }
 ```
-Returns the relevant section(s) from `aria_ref.md`.
+Returns the relevant section(s) from `nitpick_ref.md`.
 
 ## Configuration
 
@@ -54,10 +54,10 @@ Returns the relevant section(s) from `aria_ref.md`.
 ```json
 {
   "servers": {
-    "aria": {
+    "nitpick": {
       "type": "stdio",
       "command": "python3",
-      "args": ["/path/to/aria/tools/aria-mcp/aria_mcp.py"]
+      "args": ["/path/to/nitpick/tools/nitpick-mcp/nitpick_mcp.py"]
     }
   }
 }
@@ -68,9 +68,9 @@ Returns the relevant section(s) from `aria_ref.md`.
 ```json
 {
   "mcpServers": {
-    "aria": {
+    "nitpick": {
       "command": "python3",
-      "args": ["/path/to/aria/tools/aria-mcp/aria_mcp.py"]
+      "args": ["/path/to/nitpick/tools/nitpick-mcp/nitpick_mcp.py"]
     }
   }
 }
@@ -81,9 +81,9 @@ Returns the relevant section(s) from `aria_ref.md`.
 ```json
 {
   "mcpServers": {
-    "aria": {
+    "nitpick": {
       "command": "python3",
-      "args": ["/path/to/aria/tools/aria-mcp/aria_mcp.py"]
+      "args": ["/path/to/nitpick/tools/nitpick-mcp/nitpick_mcp.py"]
     }
   }
 }
@@ -91,23 +91,23 @@ Returns the relevant section(s) from `aria_ref.md`.
 
 ## Binary Discovery
 
-The server finds `ariac` and `aria-safety` automatically:
+The server finds `nitpickc` and `nitpick-safety` automatically:
 
 1. **Environment variable** — `ARIAC_BIN` / `ARIA_SAFETY_BIN`
-2. **Repo-relative paths** — `<repo>/build/ariac` and
-   `<repo>/tools/aria-safety/aria-safety`
+2. **Repo-relative paths** — `<repo>/build/nitpickc` and
+   `<repo>/tools/nitpick-safety/nitpick-safety`
 3. **`$PATH`**
 
 Override if needed:
 
 ```sh
-ARIAC_BIN=/custom/path/ariac python3 aria_mcp.py
+ARIAC_BIN=/custom/path/nitpickc python3 nitpick_mcp.py
 ```
 
 Override the reference doc path:
 
 ```sh
-ARIA_REF_MD=/custom/aria_ref.md python3 aria_mcp.py
+ARIA_REF_MD=/custom/nitpick_ref.md python3 nitpick_mcp.py
 ```
 
 ## Running Manually
@@ -115,14 +115,14 @@ ARIA_REF_MD=/custom/aria_ref.md python3 aria_mcp.py
 Start the server (reads JSON-RPC on stdin, writes on stdout):
 
 ```sh
-python3 aria_mcp.py
+python3 nitpick_mcp.py
 ```
 
 Quick smoke-test:
 
 ```sh
 echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","clientInfo":{"name":"test","version":"0"},"capabilities":{}}}' \
-  | python3 aria_mcp.py
+  | python3 nitpick_mcp.py
 ```
 
 List tools:
@@ -131,7 +131,7 @@ List tools:
 printf '%s\n%s\n' \
   '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","clientInfo":{"name":"test","version":"0"},"capabilities":{}}}' \
   '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}' \
-  | python3 aria_mcp.py
+  | python3 nitpick_mcp.py
 ```
 
 ## Transport

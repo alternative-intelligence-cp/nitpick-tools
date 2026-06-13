@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """
-aria-mcp — MCP stdio server for the Aria language toolchain.
+aria-mcp — MCP stdio server for the Nitpick language toolchain.
 
 Transport : stdio (JSON-RPC 2.0, newline-delimited)
 Zero deps : pure Python 3.8+ stdlib only
 
 Tools:
-  aria_compile(source)            — compile Aria source via ariac, structured result
+  aria_compile(source)            — compile Nitpick source via ariac, structured result
   aria_check(source)              — run aria-safety audit, structured findings
   aria_docs(query)                — section-level search over aria_ref.md
   aria_format(source)             — basic indentation/whitespace normalizer
-  aria_ask(question[, context])   — query the Aria specialist fine-tuned model
+  aria_ask(question[, context])   — query the Nitpick specialist fine-tuned model
                                     (optional; requires specialist server to be
                                      available at SPECIALIST_SCRIPT / PATH)
 
@@ -362,7 +362,7 @@ def aria_check(source: str) -> dict:
 # ── tool: aria_format ─────────────────────────────────────────────────────
 
 def aria_format(source: str) -> dict:
-    """Basic Aria source code formatter: normalizes indentation and whitespace."""
+    """Basic Nitpick source code formatter: normalizes indentation and whitespace."""
     lines = source.splitlines()
     result: list[str] = []
     indent = 0
@@ -440,15 +440,49 @@ def aria_docs(query: str) -> dict:
 
     return {"excerpt": "\n\n---\n\n".join(parts)}
 
+# ── tool: nitpick_scaffold ────────────────────────────────────────────────
+def nitpick_scaffold(path: str) -> dict:
+    try:
+        os.makedirs(os.path.join(path, "src"), exist_ok=True)
+        with open(os.path.join(path, "src", "main.npk"), "w") as f:
+            f.write("pub func:main = int32() {\n    println(\"Hello, Nitpick!\");\n    return 0i32;\n};\n")
+        with open(os.path.join(path, "nitpick-package.toml"), "w") as f:
+            f.write("[package]\nname = \"my_project\"\nversion = \"0.1.0\"\n")
+        return {"success": True, "output": f"Scaffolded Nitpick project in {path}"}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+# ── tool: nitpick_run ─────────────────────────────────────────────────────
+def nitpick_run(source: str) -> dict:
+    if not ARIAC_BIN:
+        return {"success": False, "compiler_output": "npkc not found", "run_output": ""}
+    with tempfile.NamedTemporaryFile(suffix=".npk", mode="w", delete=False) as f:
+        f.write(source)
+        src_path = f.name
+    out_path = src_path + ".out"
+    try:
+        cproc = subprocess.run([ARIAC_BIN, src_path, "-o", out_path], capture_output=True, text=True, timeout=30)
+        if cproc.returncode != 0:
+            return {"success": False, "compiler_output": cproc.stderr + cproc.stdout, "run_output": ""}
+        rproc = subprocess.run([out_path], capture_output=True, text=True, timeout=10)
+        return {"success": rproc.returncode == 0, "compiler_output": cproc.stderr + cproc.stdout, "run_output": rproc.stdout + rproc.stderr}
+    except Exception as e:
+        return {"success": False, "compiler_output": str(e), "run_output": ""}
+    finally:
+        try: os.unlink(src_path)
+        except: pass
+        try: os.unlink(out_path)
+        except: pass
+
 # ── MCP JSON-RPC 2.0 protocol ─────────────────────────────────────────────
 
 TOOL_DEFINITIONS = [
     {
         "name": "aria_compile",
         "description": (
-            "Compile Aria source code using the ariac compiler. "
+            "Compile Nitpick source code using the ariac compiler. "
             "Returns { success, errors[], warnings[], output }. "
-            "Aria uses a Result<T> type system — all user-defined functions implicitly "
+            "Nitpick uses a Result<T> type system — all user-defined functions implicitly "
             "return Result<T>. Use aria_docs to look up syntax before writing code."
         ),
         "inputSchema": {
@@ -456,7 +490,7 @@ TOOL_DEFINITIONS = [
             "properties": {
                 "source": {
                     "type":        "string",
-                    "description": "Complete Aria source code to compile.",
+                    "description": "Complete Nitpick source code to compile.",
                 }
             },
             "required": ["source"],
@@ -465,7 +499,7 @@ TOOL_DEFINITIONS = [
     {
         "name": "aria_check",
         "description": (
-            "Run the aria-safety static audit tool on Aria source code. "
+            "Run the aria-safety static audit tool on Nitpick source code. "
             "Returns { issues: [{ line, tag, message }] }. "
             "Tags: [WILD] manual memory, [RAW] raw() Result bypass, "
             "[DROP] discarded Result<T>, [OK] unknown type bypass, "
@@ -478,7 +512,7 @@ TOOL_DEFINITIONS = [
             "properties": {
                 "source": {
                     "type":        "string",
-                    "description": "Aria source code to audit for safety issues.",
+                    "description": "Nitpick source code to audit for safety issues.",
                 }
             },
             "required": ["source"],
@@ -487,7 +521,7 @@ TOOL_DEFINITIONS = [
     {
         "name": "aria_docs",
         "description": (
-            "Search the Aria language reference card (aria_ref.md) for documentation "
+            "Search the Nitpick language reference card (aria_ref.md) for documentation "
             "on any type, operator, or language construct. "
             "Returns relevant section excerpts. "
             "Example queries: 'result propagation', 'pointer system', "
@@ -499,7 +533,7 @@ TOOL_DEFINITIONS = [
             "properties": {
                 "query": {
                     "type":        "string",
-                    "description": "Terms to search for in the Aria language reference.",
+                    "description": "Terms to search for in the Nitpick language reference.",
                 }
             },
             "required": ["query"],
@@ -508,7 +542,7 @@ TOOL_DEFINITIONS = [
     {
         "name": "aria_format",
         "description": (
-            "Format Aria source code — normalize indentation and whitespace. "
+            "Format Nitpick source code — normalize indentation and whitespace. "
             "Returns { formatted: string } with consistently indented code."
         ),
         "inputSchema": {
@@ -516,19 +550,41 @@ TOOL_DEFINITIONS = [
             "properties": {
                 "source": {
                     "type":        "string",
-                    "description": "Aria source code to format.",
+                    "description": "Nitpick source code to format.",
                 }
             },
             "required": ["source"],
         },
     },
+    {
+        "name": "nitpick_scaffold",
+        "description": "Scaffolds a new Nitpick project structure.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "path": {"type": "string", "description": "Path to create the project in"}
+            },
+            "required": ["path"]
+        }
+    },
+    {
+        "name": "nitpick_run",
+        "description": "Compile and run a Nitpick source file.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "source": {"type": "string", "description": "Nitpick source code"}
+            },
+            "required": ["source"]
+        }
+    }
 ] + ([] if ARIA_ASK_DISABLED else [
     {
         "name": "aria_ask",
         "description": (
-            "Ask the Aria language specialist fine-tuned model a question about "
-            "Aria syntax, idioms, or how to write specific code. "
-            "Returns the model's text response, which often contains Aria code. "
+            "Ask the Nitpick language specialist fine-tuned model a question about "
+            "Nitpick syntax, idioms, or how to write specific code. "
+            "Returns the model's text response, which often contains Nitpick code. "
             "Validate generated code with aria_compile and audit with aria_check. "
             "The specialist server loads a ~7B parameter model on first use and "
             "may take 1-3 minutes to warm up. Subsequent calls are fast. "
@@ -539,11 +595,11 @@ TOOL_DEFINITIONS = [
             "properties": {
                 "question": {
                     "type":        "string",
-                    "description": "What to ask the Aria specialist — a task, question, or code request.",
+                    "description": "What to ask the Nitpick specialist — a task, question, or code request.",
                 },
                 "context": {
                     "type":        "string",
-                    "description": "Optional: existing Aria code or context to provide alongside the question.",
+                    "description": "Optional: existing Nitpick code or context to provide alongside the question.",
                 },
                 "max_tokens": {
                     "type":        "integer",
@@ -629,26 +685,36 @@ def _handle(req: dict) -> dict | None:
         name = params.get("name", "")
         args = params.get("arguments") or {}
 
-        if name == "aria_compile":
+        if name == "nitpick_compile" or name == "aria_compile":
             r    = aria_compile(args.get("source", ""))
             text = json.dumps(r, indent=2)
             return ok({"content": [{"type": "text", "text": text}]})
 
-        if name == "aria_check":
+        if name == "nitpick_check" or name == "aria_check":
             r    = aria_check(args.get("source", ""))
             text = json.dumps(r, indent=2)
             return ok({"content": [{"type": "text", "text": text}]})
 
-        if name == "aria_docs":
+        if name == "nitpick_docs" or name == "aria_docs":
             r = aria_docs(args.get("query", ""))
             return ok({"content": [{"type": "text", "text": r["excerpt"]}]})
 
-        if name == "aria_format":
+        if name == "nitpick_format" or name == "aria_format":
             r = aria_format(args.get("source", ""))
             text = json.dumps(r, indent=2)
             return ok({"content": [{"type": "text", "text": text}]})
 
-        if name == "aria_ask":
+        if name == "nitpick_scaffold":
+            r = nitpick_scaffold(args.get("path", ""))
+            text = json.dumps(r, indent=2)
+            return ok({"content": [{"type": "text", "text": text}]})
+
+        if name == "nitpick_run":
+            r = nitpick_run(args.get("source", ""))
+            text = json.dumps(r, indent=2)
+            return ok({"content": [{"type": "text", "text": text}]})
+
+        if name == "nitpick_ask" or name == "aria_ask":
             if ARIA_ASK_DISABLED:
                 return err(-32601, "aria_ask is disabled (ARIA_ASK_DISABLED=1)")
             r    = aria_ask(
@@ -671,7 +737,7 @@ def _handle(req: dict) -> dict | None:
 # ── stdio loop ────────────────────────────────────────────────────────────
 
 def main() -> None:
-    log = lambda msg: print(f"[aria-mcp] {msg}", file=sys.stderr, flush=True)
+    log = lambda msg: print(f"[nitpick-mcp] {msg}", file=sys.stderr, flush=True)
     log(f"ariac      = {ARIAC_BIN or '(not found)'}")
     log(f"aria-safety= {SAFETY_BIN or '(not found)'}")
     log(f"aria_ref   = {ARIA_REF_MD}")
