@@ -16,7 +16,7 @@ conversation. Also exposes `nitpick_ref.md` sections as MCP resources.
 | `nitpick_check(source)` | Run `nitpick-safety` audit; returns `{ issues: [{ line, tag, message }] }` |
 | `nitpick_docs(query)` | Section-level search over `nitpick_ref.md`; returns matching excerpts |
 | `nitpick_format(source)` | Basic indentation/whitespace normalizer |
-| `nitpick_ask(question[, context])` | Query the Nitpick specialist fine-tuned model (optional; set `ARIA_ASK_DISABLED=1` to hide) |
+| `nitpick_ask(question[, context])` | Query the Nitpick specialist fine-tuned model (optional; set `NITPICK_ASK_DISABLED=1` to hide) |
 
 ### nitpick_compile
 
@@ -93,7 +93,7 @@ Returns the relevant section(s) from `nitpick_ref.md`.
 
 The server finds `nitpickc` and `nitpick-safety` automatically:
 
-1. **Environment variable** — `ARIAC_BIN` / `ARIA_SAFETY_BIN`
+1. **Environment variable** — `NITPICKC_BIN` / `NITPICK_SAFETY_BIN`
 2. **Repo-relative paths** — `<repo>/build/nitpickc` and
    `<repo>/tools/nitpick-safety/nitpick-safety`
 3. **`$PATH`**
@@ -101,13 +101,13 @@ The server finds `nitpickc` and `nitpick-safety` automatically:
 Override if needed:
 
 ```sh
-ARIAC_BIN=/custom/path/nitpickc python3 nitpick_mcp.py
+NITPICKC_BIN=/custom/path/nitpickc python3 nitpick_mcp.py
 ```
 
 Override the reference doc path:
 
 ```sh
-ARIA_REF_MD=/custom/nitpick_ref.md python3 nitpick_mcp.py
+NITPICK_REF_MD=/custom/nitpick_ref.md python3 nitpick_mcp.py
 ```
 
 ## Running Manually

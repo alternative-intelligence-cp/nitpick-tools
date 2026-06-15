@@ -1,28 +1,28 @@
 #!/usr/bin/env python3
 """
-aria-mcp — MCP stdio server for the Nitpick language toolchain.
+nitpick-mcp — MCP stdio server for the Nitpick language toolchain.
 
 Transport : stdio (JSON-RPC 2.0, newline-delimited)
 Zero deps : pure Python 3.8+ stdlib only
 
 Tools:
-  aria_compile(source)            — compile Nitpick source via ariac, structured result
-  aria_check(source)              — run aria-safety audit, structured findings
-  aria_docs(query)                — section-level search over aria_ref.md
-  aria_format(source)             — basic indentation/whitespace normalizer
-  aria_ask(question[, context])   — query the Nitpick specialist fine-tuned model
+  nitpick_compile(source)            — compile Nitpick source via nitpickc, structured result
+  nitpick_check(source)              — run nitpick-safety audit, structured findings
+  nitpick_docs(query)                — section-level search over nitpick_ref.md
+  nitpick_format(source)             — basic indentation/whitespace normalizer
+  nitpick_ask(question[, context])   — query the Nitpick specialist fine-tuned model
                                     (optional; requires specialist server to be
                                      available at SPECIALIST_SCRIPT / PATH)
 
-Binary discovery order (for ariac and aria-safety):
-  1. Environment variable  ARIAC_BIN / ARIA_SAFETY_BIN
-  2. <repo-root>/build/ariac   or   <repo-root>/tools/aria-safety/aria-safety
+Binary discovery order (for nitpickc and nitpick-safety):
+  1. Environment variable  NITPICKC_BIN / NITPICK_SAFETY_BIN
+  2. <repo-root>/build/nitpickc   or   <repo-root>/tools/nitpick-safety/nitpick-safety
   3. $PATH
 
 Specialist server discovery:
-  1. SPECIALIST_SCRIPT env var (path to aria_specialist_server.py)
-  2. <repo-root>/tools/aria_specialist_server.py
-Set ARIA_ASK_DISABLED=1 to suppress the tool from the tools/list entirely.
+  1. SPECIALIST_SCRIPT env var (path to nitpick_specialist_server.py)
+  2. <repo-root>/tools/nitpick_specialist_server.py
+Set NITPICK_ASK_DISABLED=1 to suppress the tool from the tools/list entirely.
 """
 
 import json
@@ -39,10 +39,10 @@ from pathlib import Path
 # ── binary / path resolution ──────────────────────────────────────────────
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-# aria-mcp/ sits inside aria-tools repo, but ariac lives in the aria repo.
-# Try the sibling-repo layout first: REPOS/aria/build/ariac
-REPO_ROOT   = SCRIPT_DIR.parent.parent  # aria-tools/aria-mcp/ → aria-tools/ → REPOS/
-ARIA_ROOT   = REPO_ROOT / "aria"         # REPOS/aria/
+# nitpick-mcp/ sits inside nitpick-tools repo, but nitpickc lives in the aria repo.
+# Try the sibling-repo layout first: REPOS/nitpick/build/nitpickc
+REPO_ROOT   = SCRIPT_DIR.parent.parent  # nitpick-tools/nitpick-mcp/ → nitpick-tools/ → REPOS/
+NITPICK_ROOT   = REPO_ROOT / "aria"         # REPOS/aria/
 
 
 def _find_bin(env_var: str, *candidates: Path) -> str | None:
@@ -55,26 +55,26 @@ def _find_bin(env_var: str, *candidates: Path) -> str | None:
     return None
 
 
-ARIAC_BIN   = _find_bin("ARIAC_BIN",
-                         ARIA_ROOT / "build" / "ariac",
-                         REPO_ROOT / "build" / "ariac") \
-              or shutil.which("ariac")
+NITPICKC_BIN   = _find_bin("NITPICKC_BIN",
+                         NITPICK_ROOT / "build" / "nitpickc",
+                         REPO_ROOT / "build" / "nitpickc") \
+              or shutil.which("nitpickc")
 
-SAFETY_BIN  = _find_bin("ARIA_SAFETY_BIN",
-                         SCRIPT_DIR.parent / "aria-safety" / "aria-safety",
-                         REPO_ROOT / "tools" / "aria-safety" / "aria-safety") \
-              or shutil.which("aria-safety")
+SAFETY_BIN  = _find_bin("NITPICK_SAFETY_BIN",
+                         SCRIPT_DIR.parent / "nitpick-safety" / "nitpick-safety",
+                         REPO_ROOT / "tools" / "nitpick-safety" / "nitpick-safety") \
+              or shutil.which("nitpick-safety")
 
 
 def _find_ref_md() -> str:
-    """Resolve aria_ref.md: env var → common locations → fallback."""
-    env = os.environ.get("ARIA_REF_MD")
+    """Resolve nitpick_ref.md: env var → common locations → fallback."""
+    env = os.environ.get("NITPICK_REF_MD")
     if env and Path(env).is_file():
         return env
     candidates = [
-        REPO_ROOT / "aria-docs" / "reference" / "aria_ref.md",
-        REPO_ROOT / ".internal" / "aria_ref.md",
-        ARIA_ROOT / "docs" / "aria_ref.md",
+        REPO_ROOT / "nitpick-docs" / "reference" / "nitpick_ref.md",
+        REPO_ROOT / ".internal" / "nitpick_ref.md",
+        NITPICK_ROOT / "docs" / "nitpick_ref.md",
     ]
     for c in candidates:
         if c.is_file():
@@ -82,24 +82,24 @@ def _find_ref_md() -> str:
     return str(candidates[0])  # default even if missing
 
 
-ARIA_REF_MD = _find_ref_md()
+NITPICK_REF_MD = _find_ref_md()
 
 SPECIALIST_SCRIPT = (
     os.environ.get("SPECIALIST_SCRIPT")
-    or str(REPO_ROOT / "aria-specialist" / "aria_specialist_server.py")
+    or str(REPO_ROOT / "aria-specialist" / "nitpick_specialist_server.py")
 )
-ARIA_ASK_DISABLED = os.environ.get("ARIA_ASK_DISABLED", "").strip() not in ("", "0")
+NITPICK_ASK_DISABLED = os.environ.get("NITPICK_ASK_DISABLED", "").strip() not in ("", "0")
 
-# ── aria_ask: specialist model proxy ────────────────────────────────────────
+# ── nitpick_ask: specialist model proxy ────────────────────────────────────────
 
 READY_TIMEOUT = 240   # seconds; loading a 7B model can take a while
 
 
 class _SpecialistProxy:
     """
-    Lazy-starting, long-lived proxy to aria_specialist_server.py.
+    Lazy-starting, long-lived proxy to nitpick_specialist_server.py.
     Thread-safe (single-threaded server; only one generation at a time anyway).
-    The subprocess is started on the first aria_ask call and kept alive
+    The subprocess is started on the first nitpick_ask call and kept alive
     for the lifetime of the MCP server process.
     """
 
@@ -189,7 +189,7 @@ class _SpecialistProxy:
 _SPECIALIST = _SpecialistProxy()
 
 
-def aria_ask(question: str, context: str = "",
+def nitpick_ask(question: str, context: str = "",
              max_tokens: int = 512, temperature: float = 0.2) -> dict:
     resp = _SPECIALIST.ask(question, context, max_tokens, temperature)
     if not resp.get("ok"):
@@ -197,11 +197,11 @@ def aria_ask(question: str, context: str = "",
     return {"answer": resp.get("response", "")}
 
 
-# ── aria_ref.md section index ─────────────────────────────────────────────
+# ── nitpick_ref.md section index ─────────────────────────────────────────────
 
 def _build_section_index(path: str) -> list[dict]:
     """
-    Parse aria_ref.md into sections keyed by their ## heading.
+    Parse nitpick_ref.md into sections keyed by their ## heading.
     Returns list of { "heading": str, "body": str } dicts.
     """
     sections: list[dict] = []
@@ -221,27 +221,27 @@ def _build_section_index(path: str) -> list[dict]:
     return sections
 
 
-_SECTION_INDEX: list[dict] = []  # lazy-loaded on first aria_docs call
+_SECTION_INDEX: list[dict] = []  # lazy-loaded on first nitpick_docs call
 
 
 def _get_sections() -> list[dict]:
     global _SECTION_INDEX
     if not _SECTION_INDEX:
-        _SECTION_INDEX = _build_section_index(ARIA_REF_MD)
+        _SECTION_INDEX = _build_section_index(NITPICK_REF_MD)
     return _SECTION_INDEX
 
-# ── tool: aria_compile ────────────────────────────────────────────────────
+# ── tool: nitpick_compile ────────────────────────────────────────────────────
 
-def aria_compile(source: str) -> dict:
-    if not ARIAC_BIN:
+def nitpick_compile(source: str) -> dict:
+    if not NITPICKC_BIN:
         return {
             "success":  False,
-            "errors":   [{"message": "ariac binary not found — set ARIAC_BIN env var or add to $PATH"}],
+            "errors":   [{"message": "nitpickc binary not found — set NITPICKC_BIN env var or add to $PATH"}],
             "warnings": [],
             "output":   "",
         }
 
-    with tempfile.NamedTemporaryFile(suffix=".aria", mode="w",
+    with tempfile.NamedTemporaryFile(suffix=".npk", mode="w",
                                      delete=False, encoding="utf-8") as f:
         f.write(source)
         src_path = f.name
@@ -249,7 +249,7 @@ def aria_compile(source: str) -> dict:
     out_path = src_path + ".out"
     try:
         proc = subprocess.run(
-            [ARIAC_BIN, src_path, "-o", out_path],
+            [NITPICKC_BIN, src_path, "-o", out_path],
             capture_output=True, text=True, timeout=30,
             env={**os.environ, "NO_COLOR": "1"},
         )
@@ -259,7 +259,7 @@ def aria_compile(source: str) -> dict:
         # Strip ANSI escape sequences from compiler output
         ansi_re = re.compile(r'\x1b\[[0-9;]*[mGKHF]')
 
-        # Match patterns like "file.aria:10:5: error: message" or "error: message"
+        # Match patterns like "file.npk:10:5: error: message" or "error: message"
         diag_re = re.compile(r'^(?:(.+?):(\d+)(?::(\d+))?:\s*)?'
                              r'(error|warning|note):\s*(.+)$', re.IGNORECASE)
 
@@ -311,20 +311,20 @@ def aria_compile(source: str) -> dict:
         except OSError:
             pass
 
-# ── tool: aria_check ─────────────────────────────────────────────────────
+# ── tool: nitpick_check ─────────────────────────────────────────────────────
 
-# Matches:  file.aria:42: [TAG] message description
+# Matches:  file.npk:42: [TAG] message description
 _FINDING_RE = re.compile(r'^(.+?):(\d+):\s+\[([A-Z_]+)\]\s+(.+)$')
 
 
-def aria_check(source: str) -> dict:
+def nitpick_check(source: str) -> dict:
     if not SAFETY_BIN:
         return {
             "issues": [],
-            "error":  "aria-safety binary not found — set ARIA_SAFETY_BIN env var or add to $PATH",
+            "error":  "nitpick-safety binary not found — set NITPICK_SAFETY_BIN env var or add to $PATH",
         }
 
-    with tempfile.NamedTemporaryFile(suffix=".aria", mode="w",
+    with tempfile.NamedTemporaryFile(suffix=".npk", mode="w",
                                      delete=False, encoding="utf-8") as f:
         f.write(source)
         src_path = f.name
@@ -352,16 +352,16 @@ def aria_check(source: str) -> dict:
         return {"issues": issues}
 
     except subprocess.TimeoutExpired:
-        return {"issues": [], "error": "aria-safety timed out"}
+        return {"issues": [], "error": "nitpick-safety timed out"}
     finally:
         try:
             os.unlink(src_path)
         except OSError:
             pass
 
-# ── tool: aria_format ─────────────────────────────────────────────────────
+# ── tool: nitpick_format ─────────────────────────────────────────────────────
 
-def aria_format(source: str) -> dict:
+def nitpick_format(source: str) -> dict:
     """Basic Nitpick source code formatter: normalizes indentation and whitespace."""
     lines = source.splitlines()
     result: list[str] = []
@@ -402,10 +402,10 @@ def aria_format(source: str) -> dict:
     return {"formatted": formatted}
 
 
-def aria_docs(query: str) -> dict:
+def nitpick_docs(query: str) -> dict:
     sections = _get_sections()
     if not sections:
-        return {"excerpt": f"aria_ref.md not found or empty (path: {ARIA_REF_MD})"}
+        return {"excerpt": f"nitpick_ref.md not found or empty (path: {NITPICK_REF_MD})"}
 
     terms = [t for t in re.split(r'\s+', query.lower().strip()) if t]
     if not terms:
@@ -435,7 +435,7 @@ def aria_docs(query: str) -> dict:
         lines = (sec["heading"] + "\n\n" + sec["body"]).splitlines()
         chunk = "\n".join(lines[:40])
         if len(lines) > 40:
-            chunk += f"\n\n... ({len(lines) - 40} more lines — query aria_docs more specifically)"
+            chunk += f"\n\n... ({len(lines) - 40} more lines — query nitpick_docs more specifically)"
         parts.append(chunk)
 
     return {"excerpt": "\n\n---\n\n".join(parts)}
@@ -454,14 +454,14 @@ def nitpick_scaffold(path: str) -> dict:
 
 # ── tool: nitpick_run ─────────────────────────────────────────────────────
 def nitpick_run(source: str) -> dict:
-    if not ARIAC_BIN:
+    if not NITPICKC_BIN:
         return {"success": False, "compiler_output": "npkc not found", "run_output": ""}
     with tempfile.NamedTemporaryFile(suffix=".npk", mode="w", delete=False) as f:
         f.write(source)
         src_path = f.name
     out_path = src_path + ".out"
     try:
-        cproc = subprocess.run([ARIAC_BIN, src_path, "-o", out_path], capture_output=True, text=True, timeout=30)
+        cproc = subprocess.run([NITPICKC_BIN, src_path, "-o", out_path], capture_output=True, text=True, timeout=30)
         if cproc.returncode != 0:
             return {"success": False, "compiler_output": cproc.stderr + cproc.stdout, "run_output": ""}
         rproc = subprocess.run([out_path], capture_output=True, text=True, timeout=10)
@@ -478,12 +478,12 @@ def nitpick_run(source: str) -> dict:
 
 TOOL_DEFINITIONS = [
     {
-        "name": "aria_compile",
+        "name": "nitpick_compile",
         "description": (
-            "Compile Nitpick source code using the ariac compiler. "
+            "Compile Nitpick source code using the nitpickc compiler. "
             "Returns { success, errors[], warnings[], output }. "
             "Nitpick uses a Result<T> type system — all user-defined functions implicitly "
-            "return Result<T>. Use aria_docs to look up syntax before writing code."
+            "return Result<T>. Use nitpick_docs to look up syntax before writing code."
         ),
         "inputSchema": {
             "type": "object",
@@ -497,9 +497,9 @@ TOOL_DEFINITIONS = [
         },
     },
     {
-        "name": "aria_check",
+        "name": "nitpick_check",
         "description": (
-            "Run the aria-safety static audit tool on Nitpick source code. "
+            "Run the nitpick-safety static audit tool on Nitpick source code. "
             "Returns { issues: [{ line, tag, message }] }. "
             "Tags: [WILD] manual memory, [RAW] raw() Result bypass, "
             "[DROP] discarded Result<T>, [OK] unknown type bypass, "
@@ -519,9 +519,9 @@ TOOL_DEFINITIONS = [
         },
     },
     {
-        "name": "aria_docs",
+        "name": "nitpick_docs",
         "description": (
-            "Search the Nitpick language reference card (aria_ref.md) for documentation "
+            "Search the Nitpick language reference card (nitpick_ref.md) for documentation "
             "on any type, operator, or language construct. "
             "Returns relevant section excerpts. "
             "Example queries: 'result propagation', 'pointer system', "
@@ -540,7 +540,7 @@ TOOL_DEFINITIONS = [
         },
     },
     {
-        "name": "aria_format",
+        "name": "nitpick_format",
         "description": (
             "Format Nitpick source code — normalize indentation and whitespace. "
             "Returns { formatted: string } with consistently indented code."
@@ -578,17 +578,17 @@ TOOL_DEFINITIONS = [
             "required": ["source"]
         }
     }
-] + ([] if ARIA_ASK_DISABLED else [
+] + ([] if NITPICK_ASK_DISABLED else [
     {
-        "name": "aria_ask",
+        "name": "nitpick_ask",
         "description": (
             "Ask the Nitpick language specialist fine-tuned model a question about "
             "Nitpick syntax, idioms, or how to write specific code. "
             "Returns the model's text response, which often contains Nitpick code. "
-            "Validate generated code with aria_compile and audit with aria_check. "
+            "Validate generated code with nitpick_compile and audit with nitpick_check. "
             "The specialist server loads a ~7B parameter model on first use and "
             "may take 1-3 minutes to warm up. Subsequent calls are fast. "
-            "Set ARIA_ASK_DISABLED=1 to hide this tool if the model is not available."
+            "Set NITPICK_ASK_DISABLED=1 to hide this tool if the model is not available."
         ),
         "inputSchema": {
             "type": "object",
@@ -615,7 +615,7 @@ TOOL_DEFINITIONS = [
     },
 ])
 
-SERVER_INFO  = {"name": "aria-mcp", "version": "0.3.3"}
+SERVER_INFO  = {"name": "nitpick-mcp", "version": "0.3.3"}
 CAPABILITIES = {"tools": {}, "resources": {}}
 
 
@@ -685,22 +685,22 @@ def _handle(req: dict) -> dict | None:
         name = params.get("name", "")
         args = params.get("arguments") or {}
 
-        if name == "nitpick_compile" or name == "aria_compile":
-            r    = aria_compile(args.get("source", ""))
+        if name == "nitpick_compile" or name == "nitpick_compile":
+            r    = nitpick_compile(args.get("source", ""))
             text = json.dumps(r, indent=2)
             return ok({"content": [{"type": "text", "text": text}]})
 
-        if name == "nitpick_check" or name == "aria_check":
-            r    = aria_check(args.get("source", ""))
+        if name == "nitpick_check" or name == "nitpick_check":
+            r    = nitpick_check(args.get("source", ""))
             text = json.dumps(r, indent=2)
             return ok({"content": [{"type": "text", "text": text}]})
 
-        if name == "nitpick_docs" or name == "aria_docs":
-            r = aria_docs(args.get("query", ""))
+        if name == "nitpick_docs" or name == "nitpick_docs":
+            r = nitpick_docs(args.get("query", ""))
             return ok({"content": [{"type": "text", "text": r["excerpt"]}]})
 
-        if name == "nitpick_format" or name == "aria_format":
-            r = aria_format(args.get("source", ""))
+        if name == "nitpick_format" or name == "nitpick_format":
+            r = nitpick_format(args.get("source", ""))
             text = json.dumps(r, indent=2)
             return ok({"content": [{"type": "text", "text": text}]})
 
@@ -714,10 +714,10 @@ def _handle(req: dict) -> dict | None:
             text = json.dumps(r, indent=2)
             return ok({"content": [{"type": "text", "text": text}]})
 
-        if name == "nitpick_ask" or name == "aria_ask":
-            if ARIA_ASK_DISABLED:
-                return err(-32601, "aria_ask is disabled (ARIA_ASK_DISABLED=1)")
-            r    = aria_ask(
+        if name == "nitpick_ask" or name == "nitpick_ask":
+            if NITPICK_ASK_DISABLED:
+                return err(-32601, "nitpick_ask is disabled (NITPICK_ASK_DISABLED=1)")
+            r    = nitpick_ask(
                 args.get("question", ""),
                 args.get("context", ""),
                 int(args.get("max_tokens", 512)),
@@ -738,10 +738,10 @@ def _handle(req: dict) -> dict | None:
 
 def main() -> None:
     log = lambda msg: print(f"[nitpick-mcp] {msg}", file=sys.stderr, flush=True)
-    log(f"ariac      = {ARIAC_BIN or '(not found)'}")
-    log(f"aria-safety= {SAFETY_BIN or '(not found)'}")
-    log(f"aria_ref   = {ARIA_REF_MD}")
-    log(f"aria_ask   = {'disabled' if ARIA_ASK_DISABLED else SPECIALIST_SCRIPT}")
+    log(f"nitpickc      = {NITPICKC_BIN or '(not found)'}")
+    log(f"nitpick-safety= {SAFETY_BIN or '(not found)'}")
+    log(f"nitpick_ref   = {NITPICK_REF_MD}")
+    log(f"nitpick_ask   = {'disabled' if NITPICK_ASK_DISABLED else SPECIALIST_SCRIPT}")
     log("ready — waiting for JSON-RPC requests on stdin")
 
     for raw in sys.stdin:

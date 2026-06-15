@@ -23,6 +23,6 @@ void Init(Local<Object> exports, Local<Object> module) {
   Nan::Set(module, Nan::New("exports").ToLocalChecked(), instance);
 }
 
-NODE_MODULE(tree_sitter_aria_binding, Init)
+NODE_MODULE(tree_sitter_nitpick_binding, Init)
 
 }  // namespace

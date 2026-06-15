@@ -19,8 +19,8 @@ export function activate(context: ExtensionContext) {
 
     if (!serverPath || !fs.existsSync(serverPath)) {
         window.showErrorMessage(
-            `Aria language server not found at: ${serverPath}. ` +
-            'Please install the Aria compiler or set aria.server.path in settings.'
+            `Nitpick language server not found at: ${serverPath}. ` +
+            'Please install the Nitpick compiler or set nitpick.server.path in settings.'
         );
         return;
     }
@@ -39,21 +39,21 @@ export function activate(context: ExtensionContext) {
             options: {
                 env: {
                     ...process.env,
-                    ARIA_LS_LOG: 'debug'  // LSP server log level
+                    NITPICK_LS_LOG: 'debug'  // LSP server log level
                 }
             }
         }
     };
 
-    // Client options: document selector for .aria files
+    // Client options: document selector for .npk files
     const clientOptions: LanguageClientOptions = {
         documentSelector: [
             { scheme: 'file', language: 'aria' },
             { scheme: 'untitled', language: 'aria' }
         ],
         synchronize: {
-            // Notify server of aria.toml changes
-            fileEvents: workspace.createFileSystemWatcher('**/aria.toml')
+            // Notify server of nitpick.toml changes
+            fileEvents: workspace.createFileSystemWatcher('**/nitpick.toml')
         },
         initializationOptions: {
             // Can pass custom initialization data here
@@ -63,7 +63,7 @@ export function activate(context: ExtensionContext) {
     // Create and start the language client
     client = new LanguageClient(
         'ariaLanguageServer',
-        'Aria Language Server',
+        'Nitpick Language Server',
         serverOptions,
         clientOptions
     );
@@ -125,7 +125,7 @@ export function deactivate(): Thenable<void> | undefined {
  * Get the path to aria-ls executable
  * 
  * Priority:
- * 1. User-configured path (aria.server.path setting)
+ * 1. User-configured path (nitpick.server.path setting)
  * 2. Bundled binary (platform-specific)
  * 3. System PATH
  */
@@ -235,7 +235,7 @@ function getDebugAdapterPath(context: ExtensionContext): string | undefined {
 }
 
 /**
- * Get the path to ariac compiler
+ * Get the path to nitpickc compiler
  */
 function getCompilerPath(context: ExtensionContext): string | undefined {
     const configPath = workspace.getConfiguration('nitpick').get<string>('compiler.path');
@@ -245,9 +245,9 @@ function getCompilerPath(context: ExtensionContext): string | undefined {
 
     // Try bundled
     const platform = process.platform;
-    let binaryName = 'ariac';
+    let binaryName = 'nitpickc';
     let subdir = '';
-    if (platform === 'win32') { binaryName = 'ariac.exe'; subdir = 'windows'; }
+    if (platform === 'win32') { binaryName = 'nitpickc.exe'; subdir = 'windows'; }
     else if (platform === 'darwin') { subdir = 'macos'; }
     else if (platform === 'linux') { subdir = 'linux'; }
 
@@ -256,7 +256,7 @@ function getCompilerPath(context: ExtensionContext): string | undefined {
         if (fs.existsSync(bundled)) { return bundled; }
     }
 
-    return findInPath('ariac');
+    return findInPath('nitpickc');
 }
 
 /**
@@ -269,7 +269,7 @@ class AriaDebugAdapterFactory implements DebugAdapterDescriptorFactory {
         const dapPath = getDebugAdapterPath(this.context);
         if (!dapPath || !fs.existsSync(dapPath)) {
             window.showErrorMessage(
-                `aria-dap not found. Install the Aria compiler or set aria.debugger.path in settings.`
+                `aria-dap not found. Install the Nitpick compiler or set nitpick.debugger.path in settings.`
             );
             return undefined;
         }
@@ -293,7 +293,7 @@ class AriaDebugConfigurationProvider implements DebugConfigurationProvider {
             const editor = window.activeTextEditor;
             if (editor && editor.document.languageId === 'aria') {
                 config.type = 'aria';
-                config.name = 'Debug Aria Program';
+                config.name = 'Debug Nitpick Program';
                 config.request = 'launch';
                 config.compileFirst = true;
                 config.stopOnEntry = false;
@@ -303,7 +303,7 @@ class AriaDebugConfigurationProvider implements DebugConfigurationProvider {
         if (!config.program && config.source) {
             // Derive program from source file
             const srcPath = config.source.replace(/\$\{file\}/g, window.activeTextEditor?.document.fileName || '');
-            const base = path.basename(srcPath, '.aria');
+            const base = path.basename(srcPath, '.npk');
             const dir = folder?.uri.fsPath || path.dirname(srcPath);
             config.program = path.join(dir, 'build', base);
         }
@@ -317,7 +317,7 @@ class AriaDebugConfigurationProvider implements DebugConfigurationProvider {
         if (config.compileFirst) {
             const compilerPath = getCompilerPath(this.context);
             if (!compilerPath) {
-                window.showErrorMessage('ariac compiler not found. Cannot compile before debug.');
+                window.showErrorMessage('nitpickc compiler not found. Cannot compile before debug.');
                 return undefined;
             }
 
@@ -331,7 +331,7 @@ class AriaDebugConfigurationProvider implements DebugConfigurationProvider {
             let programPath = config.program;
             programPath = programPath.replace(/\$\{workspaceFolder\}/g, folder?.uri.fsPath || '');
             programPath = programPath.replace(/\$\{fileBasenameNoExtension\}/g,
-                path.basename(window.activeTextEditor?.document.fileName || '', '.aria'));
+                path.basename(window.activeTextEditor?.document.fileName || '', '.npk'));
 
             // Ensure build directory exists
             const buildDir = path.dirname(programPath);

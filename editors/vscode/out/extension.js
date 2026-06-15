@@ -46,8 +46,8 @@ function activate(context) {
     // Get server path from configuration or use bundled binary
     const serverPath = getServerPath(context);
     if (!serverPath || !fs.existsSync(serverPath)) {
-        vscode_1.window.showErrorMessage(`Aria language server not found at: ${serverPath}. ` +
-            'Please install the Aria compiler or set aria.server.path in settings.');
+        vscode_1.window.showErrorMessage(`Nitpick language server not found at: ${serverPath}. ` +
+            'Please install the Nitpick compiler or set nitpick.server.path in settings.');
         return;
     }
     // Server options: run aria-ls in stdio mode
@@ -64,27 +64,27 @@ function activate(context) {
             options: {
                 env: {
                     ...process.env,
-                    ARIA_LS_LOG: 'debug' // LSP server log level
+                    NITPICK_LS_LOG: 'debug' // LSP server log level
                 }
             }
         }
     };
-    // Client options: document selector for .aria files
+    // Client options: document selector for .npk files
     const clientOptions = {
         documentSelector: [
             { scheme: 'file', language: 'aria' },
             { scheme: 'untitled', language: 'aria' }
         ],
         synchronize: {
-            // Notify server of aria.toml changes
-            fileEvents: vscode_1.workspace.createFileSystemWatcher('**/aria.toml')
+            // Notify server of nitpick.toml changes
+            fileEvents: vscode_1.workspace.createFileSystemWatcher('**/nitpick.toml')
         },
         initializationOptions: {
         // Can pass custom initialization data here
         }
     };
     // Create and start the language client
-    client = new node_1.LanguageClient('ariaLanguageServer', 'Aria Language Server', serverOptions, clientOptions);
+    client = new node_1.LanguageClient('ariaLanguageServer', 'Nitpick Language Server', serverOptions, clientOptions);
     // Start the client (will also launch the server)
     client.start();
     console.log('Nitpick language server started');
@@ -129,7 +129,7 @@ function deactivate() {
  * Get the path to aria-ls executable
  *
  * Priority:
- * 1. User-configured path (aria.server.path setting)
+ * 1. User-configured path (nitpick.server.path setting)
  * 2. Bundled binary (platform-specific)
  * 3. System PATH
  */
@@ -230,7 +230,7 @@ function getDebugAdapterPath(context) {
     return findInPath('aria-dap');
 }
 /**
- * Get the path to ariac compiler
+ * Get the path to nitpickc compiler
  */
 function getCompilerPath(context) {
     const configPath = vscode_1.workspace.getConfiguration('nitpick').get('compiler.path');
@@ -239,10 +239,10 @@ function getCompilerPath(context) {
     }
     // Try bundled
     const platform = process.platform;
-    let binaryName = 'ariac';
+    let binaryName = 'nitpickc';
     let subdir = '';
     if (platform === 'win32') {
-        binaryName = 'ariac.exe';
+        binaryName = 'nitpickc.exe';
         subdir = 'windows';
     }
     else if (platform === 'darwin') {
@@ -257,7 +257,7 @@ function getCompilerPath(context) {
             return bundled;
         }
     }
-    return findInPath('ariac');
+    return findInPath('nitpickc');
 }
 /**
  * Debug adapter factory — launches aria-dap as a child process
@@ -269,7 +269,7 @@ class AriaDebugAdapterFactory {
     createDebugAdapterDescriptor(session) {
         const dapPath = getDebugAdapterPath(this.context);
         if (!dapPath || !fs.existsSync(dapPath)) {
-            vscode_1.window.showErrorMessage(`aria-dap not found. Install the Aria compiler or set aria.debugger.path in settings.`);
+            vscode_1.window.showErrorMessage(`aria-dap not found. Install the Nitpick compiler or set nitpick.debugger.path in settings.`);
             return undefined;
         }
         return new vscode_1.DebugAdapterExecutable(dapPath);
@@ -288,7 +288,7 @@ class AriaDebugConfigurationProvider {
             const editor = vscode_1.window.activeTextEditor;
             if (editor && editor.document.languageId === 'aria') {
                 config.type = 'aria';
-                config.name = 'Debug Aria Program';
+                config.name = 'Debug Nitpick Program';
                 config.request = 'launch';
                 config.compileFirst = true;
                 config.stopOnEntry = false;
@@ -297,7 +297,7 @@ class AriaDebugConfigurationProvider {
         if (!config.program && config.source) {
             // Derive program from source file
             const srcPath = config.source.replace(/\$\{file\}/g, vscode_1.window.activeTextEditor?.document.fileName || '');
-            const base = path.basename(srcPath, '.aria');
+            const base = path.basename(srcPath, '.npk');
             const dir = folder?.uri.fsPath || path.dirname(srcPath);
             config.program = path.join(dir, 'build', base);
         }
@@ -309,7 +309,7 @@ class AriaDebugConfigurationProvider {
         if (config.compileFirst) {
             const compilerPath = getCompilerPath(this.context);
             if (!compilerPath) {
-                vscode_1.window.showErrorMessage('ariac compiler not found. Cannot compile before debug.');
+                vscode_1.window.showErrorMessage('nitpickc compiler not found. Cannot compile before debug.');
                 return undefined;
             }
             const sourcePath = config.source?.replace(/\$\{file\}/g, vscode_1.window.activeTextEditor?.document.fileName || '');
@@ -320,7 +320,7 @@ class AriaDebugConfigurationProvider {
             // Resolve program path
             let programPath = config.program;
             programPath = programPath.replace(/\$\{workspaceFolder\}/g, folder?.uri.fsPath || '');
-            programPath = programPath.replace(/\$\{fileBasenameNoExtension\}/g, path.basename(vscode_1.window.activeTextEditor?.document.fileName || '', '.aria'));
+            programPath = programPath.replace(/\$\{fileBasenameNoExtension\}/g, path.basename(vscode_1.window.activeTextEditor?.document.fileName || '', '.npk'));
             // Ensure build directory exists
             const buildDir = path.dirname(programPath);
             if (!fs.existsSync(buildDir)) {

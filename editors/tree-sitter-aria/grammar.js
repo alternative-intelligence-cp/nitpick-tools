@@ -1,5 +1,5 @@
 /**
- * Tree-sitter Grammar for Aria Programming Language
+ * Tree-sitter Grammar for Nitpick Programming Language
  * 
  * Provides structural parsing for:
  * - Neovim (nvim-treesitter)
@@ -465,7 +465,7 @@ module.exports = grammar({
         break_statement: $ => seq('break', ';'),
         continue_statement: $ => seq('continue', ';'),
 
-        // Aria return mechanisms
+        // Nitpick return mechanisms
         pass_statement: $ => seq('pass', '(', optional($._expression), ')', ';'),
         fail_statement: $ => seq('fail', '(', optional($._expression), ')', ';'),
 
@@ -509,7 +509,7 @@ module.exports = grammar({
         // Failsafe — required error handler
         failsafe_block: $ => seq('failsafe', field('body', $.block)),
 
-        // Use statement (Aria's import)
+        // Use statement (Nitpick's import)
         use_statement: $ => seq(
             'use',
             $.string_literal,

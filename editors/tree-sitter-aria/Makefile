@@ -9,19 +9,19 @@ test: build
 	tree-sitter test
 
 parse: build
-	tree-sitter parse ../vscode/sample.aria
+	tree-sitter parse ../vscode/sample.npk
 
 clean:
 	rm -rf node_modules
 	rm -rf src/
-	rm -f tree-sitter-aria.wasm
+	rm -f tree-sitter-nitpick.wasm
 
 install:
 	npm install
 
 # Build shared library for Helix/Emacs
 lib: build
-	tree-sitter build -o libtree-sitter-aria.so
+	tree-sitter build -o libtree-sitter-nitpick.so
 
 # Install to Neovim
 install-nvim: build
@@ -33,5 +33,5 @@ install-helix: lib
 	mkdir -p ~/.config/helix/runtime/grammars/sources/aria
 	mkdir -p ~/.config/helix/runtime/queries/aria
 	cp -r . ~/.config/helix/runtime/grammars/sources/aria/
-	cp libtree-sitter-aria.so ~/.config/helix/runtime/grammars/
+	cp libtree-sitter-nitpick.so ~/.config/helix/runtime/grammars/
 	cp -r queries/* ~/.config/helix/runtime/queries/aria/

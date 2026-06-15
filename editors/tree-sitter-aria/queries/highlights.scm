@@ -13,7 +13,7 @@
   "const"
 ] @keyword
 
-; Keywords — module system (use/extern are Aria's import mechanism)
+; Keywords — module system (use/extern are Nitpick's import mechanism)
 [
   "use"
   "extern"

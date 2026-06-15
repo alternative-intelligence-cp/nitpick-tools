@@ -1,7 +1,7 @@
-// sample.aria — demonstrates Aria syntax for testing syntax highlighting
-// Run: ariac sample.aria -o /tmp/sample && /tmp/sample
+// sample.npk — demonstrates Nitpick syntax for testing syntax highlighting
+// Run: nitpickc sample.npk -o /tmp/sample && /tmp/sample
 
-use "/path/to/aria-rand/src/aria_rand.aria".*;
+use "/path/to/aria-rand/src/nitpick_rand.npk".*;
 
 extern "libc" {
     func:puts   = int32(string:s);
@@ -126,7 +126,7 @@ func:memory_demo = NIL() {
     wild int32:managed = 42i32;
 
     // wildx — Write XOR Execute (W^X) for JIT-generated code
-    // wildx int8->:code = aria.alloc<int8>(512i64);
+    // wildx int8->:code = nitpick.alloc<int8>(512i64);
 
     // Blueprint pointer syntax (vs C's ambiguous * and &):
     //   int32->:ptr     means "pointer to int32"
@@ -224,7 +224,7 @@ func:intrinsic_demo = NIL() {
     pass(NIL);
 };
 
-// ── Failsafe — MANDATORY in every Aria program ───────────────────────────────
+// ── Failsafe — MANDATORY in every Nitpick program ───────────────────────────────
 // Triggered by ?! unwrap failure, unhandled fail(), or system fault
 // Must return int32, take tbb32 param, and call exit (never pass)
 func:failsafe = int32(tbb32:err_code) {
@@ -234,7 +234,7 @@ func:failsafe = int32(tbb32:err_code) {
 
 // ── Entry point ───────────────────────────────────────────────────────────────
 func:main = int32() {
-    drop(puts("Aria syntax highlighting test"));
+    drop(puts("Nitpick syntax highlighting test"));
 
     drop(raw(demonstrate_tos()));
     drop(raw(numeric_demo()));

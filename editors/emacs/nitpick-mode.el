@@ -1,17 +1,17 @@
-;;; aria-mode.el --- Major mode for the Aria programming language -*- lexical-binding: t; -*-
+;;; aria-mode.el --- Major mode for the Nitpick programming language -*- lexical-binding: t; -*-
 
-;; Author: Aria Language Project
+;; Author: Nitpick Language Project
 ;; Keywords: languages aria
 ;; Version: 0.2.15
 
 ;;; Commentary:
 
-;; Major mode for editing Aria (.aria) source files.
+;; Major mode for editing Nitpick (.npk) source files.
 ;;
-;; Aria syntax quick-reference:
+;; Nitpick syntax quick-reference:
 ;;   func:name = ReturnType(params) { pass(val); };
 ;;   int32:x = 42i32;
-;;   use "path/to/file.aria".*;
+;;   use "path/to/file.npk".*;
 ;;   extern "libc" { func:puts = int32(string:s); }
 ;;   loop(0i32, 10i32, 1i32) { }   while (cond) { }   till (cond) { }
 ;;   pass(val)  fail("msg")         ;; return mechanisms
@@ -24,7 +24,7 @@
 ;;   (require 'aria-mode)
 ;; Or with use-package:
 ;;   (use-package aria-mode
-;;     :mode "\\.aria\\'")
+;;     :mode "\\.npk\\'")
 ;;
 ;; For tree-sitter support (Emacs 29+):
 ;;   (add-to-list 'major-mode-remap-alist '(aria-mode . aria-ts-mode))
@@ -36,7 +36,7 @@
 ;;;; Face definitions
 
 (defgroup aria-mode nil
-  "Major mode for the Aria programming language."
+  "Major mode for the Nitpick programming language."
   :group 'languages
   :prefix "aria-")
 
@@ -63,33 +63,33 @@
 (defconst aria-mode-integer-types
   '("int1" "int2" "int4" "int8" "int16" "int32" "int64" "int128" "int256" "int512" "int1024" "int2048" "int4096"
     "uint1" "uint2" "uint4" "uint8" "uint16" "uint32" "uint64" "uint128" "uint256" "uint512" "uint1024" "uint2048" "uint4096")
-  "Aria integer type names.")
+  "Nitpick integer type names.")
 
 (defconst aria-mode-float-types
   '("flt16" "flt32" "flt64" "flt128" "flt256" "flt512")
-  "Aria floating-point type names.")
+  "Nitpick floating-point type names.")
 
 (defconst aria-mode-tbb-types
   '("tbb8" "tbb16" "tbb32" "tbb64" "tbb128" "tbb256")
-  "Aria TBB (Twisted Balanced Binary) type names.")
+  "Nitpick TBB (Twisted Balanced Binary) type names.")
 
 (defconst aria-mode-special-types
   '("fix256" "tfp32" "tfp64" "frac8" "frac16" "frac32" "frac64" "fixed"
     "bool" "string" "void" "trit" "tryte" "nit" "nyte")
-  "Aria special and balanced-numeric type names.")
+  "Nitpick special and balanced-numeric type names.")
 
 (defconst aria-mode-container-types
   '("array" "binary" "buffer" "matrix" "tensor" "tmatrix" "ttensor"
     "vec2" "vec3" "vec9")
-  "Aria container and compound type names.")
+  "Nitpick container and compound type names.")
 
 (defconst aria-mode-type-meta
   '("dyn" "obj" "opaque" "Type")
-  "Aria type system meta-keywords.")
+  "Nitpick type system meta-keywords.")
 
 (defconst aria-mode-generic-types
   '("Result" "Handle" "arena" "atomic" "simd" "quantum" "complex")
-  "Aria generic container type names.")
+  "Nitpick generic container type names.")
 
 (defconst aria-mode-all-types
   (append aria-mode-integer-types
@@ -98,21 +98,21 @@
           aria-mode-special-types
           aria-mode-container-types
           aria-mode-type-meta)
-  "All non-generic Aria type names.")
+  "All non-generic Nitpick type names.")
 
 (defconst aria-mode-control-keywords
   '("if" "else" "when" "then" "end" "pick" "case" "default"
     "while" "till" "loop" "for" "in" "break" "continue" "fall"
     "defer" "async" "await" "catch" "return")
-  "Aria control-flow keywords.")
+  "Nitpick control-flow keywords.")
 
 (defconst aria-mode-declaration-keywords
   '("func" "struct" "enum" "trait" "impl" "mod" "type" "const")
-  "Aria declaration keywords.")
+  "Nitpick declaration keywords.")
 
 (defconst aria-mode-module-keywords
   '("use" "extern")
-  "Aria module system keywords.")
+  "Nitpick module system keywords.")
 
 (defconst aria-mode-other-keywords
   '("pub" "priv" "as" "is" "ref" "mut" "move" "copy"
@@ -122,19 +122,19 @@
     "requires" "ensures" "invariant"
     "process" "pipe" "stream" "debug"
     "acq_rel" "acquire" "relaxed" "release" "seq_cst")
-  "Aria miscellaneous keywords.")
+  "Nitpick miscellaneous keywords.")
 
 (defconst aria-mode-return-keywords
   '("pass" "fail")
-  "Aria return-mechanism keywords (analogous to 'return' in other languages).")
+  "Nitpick return-mechanism keywords (analogous to 'return' in other languages).")
 
 (defconst aria-mode-tos-builtins
   '("drop" "raw" "ok")
-  "Aria TOS (Type OK System) bypass builtins — explicit intent markers.")
+  "Nitpick TOS (Type OK System) bypass builtins — explicit intent markers.")
 
 (defconst aria-mode-language-constants
   '("true" "false" "NIL" "NULL" "ERR" "unknown")
-  "Aria language constants.")
+  "Nitpick language constants.")
 
 ;;;; Syntax helpers
 
@@ -179,7 +179,7 @@ Group 1 = type name, group 2 = colon, group 3 = variable name."
      (2 font-lock-punctuation-face)
      (3 font-lock-function-name-face))
 
-    ;; --- Return mechanisms (pass/fail are Aria's return equivalent) ---
+    ;; --- Return mechanisms (pass/fail are Nitpick's return equivalent) ---
     (,(aria-mode--keyword-regexp aria-mode-return-keywords)
      . font-lock-keyword-face)
 
@@ -296,12 +296,12 @@ Group 1 = type name, group 2 = colon, group 3 = variable name."
 ;;;; Indentation
 
 (defcustom aria-mode-indent-offset 4
-  "Number of spaces per indentation level in Aria code."
+  "Number of spaces per indentation level in Nitpick code."
   :type 'integer
   :group 'aria-mode)
 
 (defun aria-mode-indent-line ()
-  "Indent current line as Aria code.
+  "Indent current line as Nitpick code.
 Uses simple brace-counting: indent by one level for each unclosed {."
   (interactive)
   (let ((indent-col 0))
@@ -320,9 +320,9 @@ Uses simple brace-counting: indent by one level for each unclosed {."
 
 ;;;###autoload
 (define-derived-mode aria-mode prog-mode "Aria"
-  "Major mode for editing Aria programming language source files.
+  "Major mode for editing Nitpick programming language source files.
 
-Aria is a systems programming language with:
+Nitpick is a systems programming language with:
 - TBB (Twisted Balanced Binary) types with ERR sentinel
 - Result<T> return values with pass/fail/drop/raw/ok operators
 - Blueprint pointer syntax: int32->:ptr  @addr  <-ptr  #pin  $ref
@@ -348,7 +348,7 @@ Keybindings:
   (setq-local indent-tabs-mode nil))
 
 ;;;###autoload
-(add-to-list 'auto-mode-alist '("\\.aria\\'" . aria-mode))
+(add-to-list 'auto-mode-alist '("\\.npk\\'" . aria-mode))
 
 (provide 'aria-mode)
 

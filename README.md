@@ -7,8 +7,8 @@
 [![CI](https://github.com/alternative-intelligence-cp/nitpick-tools/actions/workflows/ci.yml/badge.svg)](https://github.com/alternative-intelligence-cp/nitpick-tools/actions/workflows/ci.yml)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
-> 🚧 **Rebrand in progress:** Aria is becoming **Nitpick**. This tooling repo
-> still uses Aria names while the migration is underway. Editor grammars,
+> 🚧 **Rebrand in progress:** Nitpick is becoming **Nitpick**. This tooling repo
+> still uses Nitpick names while the migration is underway. Editor grammars,
 > generated extension assets, and tool command names need compatibility planning
 > before any breaking rename.
 

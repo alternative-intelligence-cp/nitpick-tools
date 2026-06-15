@@ -1,4 +1,4 @@
-name: Aria Tools CI
+name: Nitpick Tools CI
 
 on:
   push:
@@ -17,15 +17,15 @@ jobs:
 
       - name: Build safety auditor
         run: |
-          cd aria-safety
+          cd nitpick-safety
           make
-          test -f aria-safety && echo "aria-safety built" || exit 1
+          test -f nitpick-safety && echo "nitpick-safety built" || exit 1
 
       - name: Smoke test
         run: |
-          cd aria-safety
-          echo 'func:main = int32() { exit(0); };' > /tmp/test.aria
-          ./aria-safety /tmp/test.aria || true
+          cd nitpick-safety
+          echo 'func:main = int32() { exit(0); };' > /tmp/test.npk
+          ./nitpick-safety /tmp/test.npk || true
           echo "Safety auditor runs without crash"
 
   mcp-server:
@@ -37,13 +37,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Python syntax check
-        run: python3 -m py_compile aria-mcp/aria_mcp.py
+        run: python3 -m py_compile nitpick-mcp/nitpick_mcp.py
 
       - name: MCP server smoke test
         run: |
           # Send an initialize request and verify it responds
           echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' | \
-            timeout 5 python3 aria-mcp/aria_mcp.py 2>/dev/null || true
+            timeout 5 python3 nitpick-mcp/nitpick_mcp.py 2>/dev/null || true
           echo "MCP server starts without crash"
 
   vscode-extension:
@@ -56,7 +56,7 @@ jobs:
 
       - name: Validate package.json
         run: |
-          cd vscode-aria
+          cd vscode-nitpick
           python3 -c "
           import json, sys
           with open('package.json') as f:
@@ -72,10 +72,10 @@ jobs:
 
       - name: Validate grammar
         run: |
-          cd vscode-aria
+          cd vscode-nitpick
           python3 -c "
           import json
-          with open('syntaxes/aria.tmLanguage.json') as f:
+          with open('syntaxes/nitpick.tmLanguage.json') as f:
               grammar = json.load(f)
           print(f\"Scope: {grammar.get('scopeName', 'MISSING')}\")
           patterns = grammar.get('patterns', [])

@@ -1,7 +1,7 @@
 {
   "targets": [
     {
-      "target_name": "tree_sitter_aria_binding",
+      "target_name": "tree_sitter_nitpick_binding",
       "include_dirs": [
         "<!(node -e \"require('nan')\")",
         "src"

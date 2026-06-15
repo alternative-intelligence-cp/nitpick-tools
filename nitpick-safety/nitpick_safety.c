@@ -1,6 +1,6 @@
-/* aria_safety.c — Static safety audit tool for Aria source files
+/* nitpick_safety.c — Static safety audit tool for Nitpick source files
  *
- * Scans .aria files for constructs that require manual safety review.
+ * Scans .npk files for constructs that require manual safety review.
  *
  * Findings:
  *   [WILD]     wild / wildx allocation — manual lifetime, no GC safety
@@ -19,7 +19,7 @@
  *   [EMPHATIC] ?! — emphatic unwrap, calls failsafe on error (TOS escalation)
  *
  * Build:
- *   gcc -O2 -Wall -Wextra -std=c99 -o aria-safety aria_safety.c
+ *   gcc -O2 -Wall -Wextra -std=c99 -o nitpick-safety nitpick_safety.c
  *   (or: make)
  *
  * Usage:
@@ -211,7 +211,7 @@ static void scan_file(const char *path)
 {
     FILE *f = fopen(path, "r");
     if (!f) {
-        fprintf(stderr, "aria-safety: cannot open '%s': %s\n",
+        fprintf(stderr, "nitpick-safety: cannot open '%s': %s\n",
                 path, strerror(errno));
         return;
     }
@@ -343,7 +343,7 @@ static void scan_dir(const char *dirpath)
 {
     DIR *d = opendir(dirpath);
     if (!d) {
-        fprintf(stderr, "aria-safety: cannot open '%s': %s\n",
+        fprintf(stderr, "nitpick-safety: cannot open '%s': %s\n",
                 dirpath, strerror(errno));
         return;
     }
@@ -365,7 +365,7 @@ static void scan_path(const char *path)
 {
     struct stat st;
     if (stat(path, &st) != 0) {
-        fprintf(stderr, "aria-safety: '%s': %s\n", path, strerror(errno));
+        fprintf(stderr, "nitpick-safety: '%s': %s\n", path, strerror(errno));
         return;
     }
 

@@ -36,7 +36,7 @@
                     "aria"
                 ],
                 "extensions": [
-                    ".aria",
+                    ".npk",
                     ".npk"
                 ],
                 "configuration": "./language-configuration.json",
@@ -55,8 +55,8 @@
         "grammars": [
             {
                 "language": "aria",
-                "scopeName": "source.aria",
-                "path": "./syntaxes/aria.tmLanguage.json"
+                "scopeName": "source.npk",
+                "path": "./syntaxes/nitpick.tmLanguage.json"
             }
         ],
         "configuration": {
@@ -115,7 +115,7 @@
                             },
                             "source": {
                                 "type": "string",
-                                "description": "Path to the .aria source file (for source mapping).",
+                                "description": "Path to the .npk source file (for source mapping).",
                                 "default": "${file}"
                             },
                             "stopOnEntry": {
@@ -177,12 +177,12 @@
                 "textMateRules": [
                     {
                         "scope": [
-                            "keyword.danger.memory.aria",
-                            "keyword.danger.raw.aria",
-                            "keyword.danger.drop.aria",
-                            "keyword.danger.shorthand.aria",
-                            "keyword.danger.syscall.aria",
-                            "keyword.danger.failsafe-call.aria"
+                            "keyword.danger.memory.npk",
+                            "keyword.danger.raw.npk",
+                            "keyword.danger.drop.npk",
+                            "keyword.danger.shorthand.npk",
+                            "keyword.danger.syscall.npk",
+                            "keyword.danger.failsafe-call.npk"
                         ],
                         "settings": {
                             "foreground": "#FF4444",
@@ -191,10 +191,10 @@
                     },
                     {
                         "scope": [
-                            "keyword.warning.defaults.aria",
-                            "keyword.warning.defaults-op.aria",
-                            "keyword.warning.ok.aria",
-                            "keyword.warning.failsafe.aria"
+                            "keyword.warning.defaults.npk",
+                            "keyword.warning.defaults-op.npk",
+                            "keyword.warning.ok.npk",
+                            "keyword.warning.failsafe.npk"
                         ],
                         "settings": {
                             "foreground": "#FFCC00",

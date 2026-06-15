@@ -32,7 +32,7 @@ def main():
     script_dir = Path(__file__).resolve().parent
     repo_root = script_dir.parent.parent
     
-    npkc_bin = shutil.which("npkc") or (repo_root / "build" / "ariac")
+    npkc_bin = shutil.which("npkc") or (repo_root / "build" / "nitpickc")
     if not npkc_bin or not Path(npkc_bin).exists():
         # Fallback to the known nitpick path
         npkc_bin = repo_root / "nitpick" / "build" / "npkc"

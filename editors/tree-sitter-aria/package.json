@@ -31,7 +31,7 @@
     },
     "tree-sitter": [
         {
-            "scope": "source.aria",
+            "scope": "source.npk",
             "file-types": [
                 "aria"
             ],
