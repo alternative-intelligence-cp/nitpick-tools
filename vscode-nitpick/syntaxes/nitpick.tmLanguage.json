@@ -10,6 +10,7 @@
         { "include": "#numbers" },
         { "include": "#borrow-annotations" },
         { "include": "#function-declaration" },
+        { "include": "#decorators" },
         { "include": "#danger-keywords" },
         { "include": "#warning-keywords" },
         { "include": "#failsafe" },
@@ -65,6 +66,15 @@
                         "3": { "name": "punctuation.separator.npk" },
                         "4": { "name": "entity.name.function.npk" }
                     }
+                }
+            ]
+        },
+        "decorators": {
+            "patterns": [
+                {
+                    "comment": "Modern decorators like @test, @inline, etc.",
+                    "name": "meta.annotation.npk",
+                    "match": "@[a-zA-Z_][a-zA-Z0-9_]*\\b"
                 }
             ]
         },
@@ -231,6 +241,15 @@
                     "comment": "Special value constants: NIL, NULL, ERR",
                     "name": "constant.language.nil.npk",
                     "match": "\\b(NIL|NULL|ERR)\\b"
+                },
+                {
+                    "comment": "Type:Name namespace declaration",
+                    "match": "\\b(Type)(:)([A-Z][a-zA-Z0-9_]*)",
+                    "captures": {
+                        "1": { "name": "keyword.declaration.type.npk" },
+                        "2": { "name": "punctuation.separator.npk" },
+                        "3": { "name": "entity.name.type.npk" }
+                    }
                 }
             ]
         },
@@ -301,23 +320,23 @@
             "patterns": [
                 {
                     "name": "constant.numeric.hex.npk",
-                    "match": "\\b0[xX][0-9A-Fa-f_]+\\b"
+                    "match": "\\b0[xX][0-9A-Fa-f_]+(?:i8|i16|i32|i64|u8|u16|u32|u64)?\\b"
                 },
                 {
                     "name": "constant.numeric.binary.npk",
-                    "match": "\\b0[bB][01_]+\\b"
+                    "match": "\\b0[bB][01_]+(?:i8|i16|i32|i64|u8|u16|u32|u64)?\\b"
                 },
                 {
                     "name": "constant.numeric.octal.npk",
-                    "match": "\\b0[oO][0-7_]+\\b"
+                    "match": "\\b0[oO][0-7_]+(?:i8|i16|i32|i64|u8|u16|u32|u64)?\\b"
                 },
                 {
                     "name": "constant.numeric.float.npk",
-                    "match": "\\b[0-9][0-9_]*\\.[0-9][0-9_]*([eE][+-]?[0-9_]+)?\\b"
+                    "match": "\\b[0-9][0-9_]*\\.[0-9][0-9_]*(?:[eE][+-]?[0-9_]+)?(?:f32|f64)?\\b"
                 },
                 {
                     "name": "constant.numeric.integer.npk",
-                    "match": "\\b[0-9][0-9_]*\\b"
+                    "match": "\\b[0-9][0-9_]*(?:i8|i16|i32|i64|u8|u16|u32|u64)?\\b"
                 },
                 {
                     "name": "constant.language.boolean.npk",

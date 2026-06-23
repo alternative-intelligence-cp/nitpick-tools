@@ -1,0 +1,10 @@
+extern func:malloc = void*(uint64:size);
+
+func:failsafe = int32(tbb32:err) {
+    exit 1i32;
+};
+
+func:main = int32() {
+    malloc(1024u64);
+    return 0i32;
+};

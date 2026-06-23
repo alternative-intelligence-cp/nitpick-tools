@@ -52,15 +52,4 @@ src/parser.npk:91:   [RAW]      raw() strips Result<T> — caller must handle fa
 | `1`  | One or more findings present  |
 | `2`  | Usage error or no files found |
 
-## v1 Limitations
 
-- `//` comment stripping is naive and does not account for `//` inside string literals
-- Brace counting for `failsafe` block triviality can be thrown off by unbalanced
-  `{` / `}` inside string literals within the block
-- Content placed on the same line as the `failsafe` opening brace (after the `{`)
-  is not checked for triviality in multi-line blocks
-- String literals are not excluded from pattern matching; a string containing
-  `raw(` or `wild` would be flagged
-
-These are all acceptable for a v1 review-aid tool. False positives require a
-quick human glance; false negatives for the edge cases above are rare in practice.

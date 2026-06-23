@@ -1,8 +1,8 @@
 {
-    "name": "aria-language",
+    "name": "nitpick-language",
     "displayName": "Nitpick Language Support",
     "description": "Syntax highlighting and language support for the Nitpick programming language",
-    "version": "0.2.13",
+    "version": "1.0.0",
     "publisher": "alternative-intelligence",
     "repository": {
         "type": "git",
@@ -11,16 +11,19 @@
     "engines": {
         "vscode": "^1.80.0"
     },
+    "scripts": {
+        "test": "vscode-tmgrammar-test test/**/*.npk"
+    },
     "categories": [
         "Programming Languages"
     ],
     "contributes": {
         "languages": [
             {
-                "id": "aria",
+                "id": "nitpick",
                 "aliases": [
                     "Nitpick",
-                    "aria"
+                    "nitpick"
                 ],
                 "extensions": [
                     ".npk"
@@ -30,14 +33,14 @@
         ],
         "grammars": [
             {
-                "language": "aria",
+                "language": "nitpick",
                 "scopeName": "source.npk",
                 "path": "./syntaxes/nitpick.tmLanguage.json"
             }
         ],
         "snippets": [
             {
-                "language": "aria",
+                "language": "nitpick",
                 "path": "./snippets/nitpick.json"
             }
         ],
@@ -73,5 +76,8 @@
                 ]
             }
         }
+    },
+    "devDependencies": {
+        "vscode-tmgrammar-test": "^0.1.3"
     }
 }

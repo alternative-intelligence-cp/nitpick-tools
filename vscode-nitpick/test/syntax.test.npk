@@ -1,0 +1,25 @@
+// SYNTAX TEST "source.npk" "Basic Syntax test"
+
+// Line comment
+// <- comment.line.double-slash.npk
+
+/* Block comment */
+// <- comment.block.npk
+
+func:main = int32() {
+// <- keyword.declaration.function.npk
+//   ^^^^ entity.name.function.npk
+//          ^^^^^ storage.type.integer.npk
+    let str = "Hello";
+//            ^^^^^^^ string.quoted.double.npk
+    failsafe {
+//  ^^^^^^^^ keyword.warning.failsafe.npk
+        exit 1i32;
+//      ^^^^ keyword.control.return.npk
+//           ^^^^ constant.numeric.integer.npk
+    };
+    
+    wild alloc(1024u64);
+//  ^^^^ keyword.danger.memory.npk
+//             ^^^^^^^ constant.numeric.integer.npk
+};

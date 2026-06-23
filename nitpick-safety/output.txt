@@ -1,0 +1,5 @@
+
+3 findings across 1 file
+mock_file.npk:15: [FAILSAFE] empty or trivial failsafe block — error is silently swallowed
+mock_file.npk:19: [WILD] wildx allocation — no GC, no bounds checking; manual lifetime required
+mock_file.npk:20: [RAW] raw() strips Result<T> — caller must handle failure explicitly

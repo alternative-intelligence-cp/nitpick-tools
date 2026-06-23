@@ -7,7 +7,7 @@ UndefinedBehaviorSanitizer (UBSAN) enabled, and runs it to catch memory
 and undefined behavior errors at runtime.
 
 Usage:
-  nitpick-test <file.npk> [args...]
+  nitpick-test <file.npk|directory> [args...]
 """
 
 import sys
@@ -16,15 +16,75 @@ import subprocess
 import tempfile
 from pathlib import Path
 import shutil
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+def compile_and_run(input_file, program_args, npkc_bin, runtime_lib):
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp_path = Path(tmpdir)
+        ll_file = tmp_path / "out.ll"
+        exe_file = tmp_path / "out_asan"
+
+        npkc_cmd = [str(npkc_bin), str(input_file), "--emit-llvm", "-o", str(ll_file)]
+        res = subprocess.run(npkc_cmd, capture_output=True, text=True)
+        if res.returncode != 0:
+            return False, f"npkc compilation failed:\n{res.stderr}"
+
+        # In case there's an issue with getelementptr (like in test.sh), do the string replacement
+        try:
+            with open(ll_file, "r") as f:
+                ll_code = f.read()
+            ll_code = ll_code.replace("getelementptr inbounds nuw", "getelementptr inbounds")
+            with open(ll_file, "w") as f:
+                f.write(ll_code)
+        except Exception:
+            pass
+
+        clang_cmd = [
+            "clang++",
+            "-fsanitize=address,undefined",
+            "-fno-omit-frame-pointer",
+            "-O0",
+            "-g",
+            str(ll_file),
+            str(runtime_lib),
+            "-latomic",
+            "-o", str(exe_file)
+        ]
+        
+        # Add basic shim paths just in case it's in nitpick-packages
+        input_dir = input_file.parent
+        shim_lib = input_dir.parent / "shim"
+        if shim_lib.exists():
+            clang_cmd.extend(["-L" + str(shim_lib)])
+            # Try to guess the lib name
+            for f in shim_lib.glob("lib*.a"):
+                lib_name = f.name[3:-2] # remove lib and .a
+                clang_cmd.append(f"-l{lib_name}")
+
+        res = subprocess.run(clang_cmd, capture_output=True, text=True)
+        if res.returncode != 0:
+            return False, f"clang instrumentation failed:\n{res.stderr}"
+
+        run_cmd = [str(exe_file)] + program_args
+        env = os.environ.copy()
+        env["ASAN_OPTIONS"] = "detect_leaks=1,strict_string_checks=1,detect_stack_use_after_return=1"
+        
+        res = subprocess.run(run_cmd, env=env, capture_output=True, text=True)
+        
+        output = res.stdout + res.stderr
+        
+        if res.returncode != 0:
+            return False, output
+        return True, output
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: nitpick-test <file.npk> [args...]")
+        print("Usage: nitpick-test <file.npk|directory> [args...]")
         sys.exit(1)
 
-    input_file = Path(sys.argv[1]).resolve()
-    if not input_file.exists():
-        print(f"Error: file '{input_file}' not found.")
+    input_path = Path(sys.argv[1]).resolve()
+    if not input_path.exists():
+        print(f"Error: path '{input_path}' not found.")
         sys.exit(1)
 
     program_args = sys.argv[2:]
@@ -34,7 +94,6 @@ def main():
     
     npkc_bin = shutil.which("npkc") or (repo_root / "build" / "nitpickc")
     if not npkc_bin or not Path(npkc_bin).exists():
-        # Fallback to the known nitpick path
         npkc_bin = repo_root / "nitpick" / "build" / "npkc"
     
     if not npkc_bin or not Path(npkc_bin).exists():
@@ -46,48 +105,59 @@ def main():
         print(f"Error: libnitpick_runtime.a not found at {runtime_lib}")
         sys.exit(1)
 
-    with tempfile.TemporaryDirectory() as tmpdir:
-        tmp_path = Path(tmpdir)
-        ll_file = tmp_path / "out.ll"
-        exe_file = tmp_path / "out_asan"
+    test_files = []
+    if input_path.is_file():
+        test_files.append(input_path)
+    else:
+        for p in input_path.rglob("test_*.npk"):
+            test_files.append(p)
+            
+    if not test_files:
+        print(f"No test_*.npk files found in {input_path}")
+        sys.exit(1)
 
-        print(f"[nitpick-test] Compiling {input_file.name} to LLVM IR...")
-        npkc_cmd = [str(npkc_bin), str(input_file), "--emit-llvm", "-o", str(ll_file)]
-        res = subprocess.run(npkc_cmd, capture_output=True, text=True)
-        if res.returncode != 0:
-            print("npkc compilation failed:")
-            print(res.stderr)
-            sys.exit(1)
+    print(f"[nitpick-test] Discovered {len(test_files)} test file(s).")
+    
+    passed = 0
+    failed = 0
+    results = {}
 
-        print(f"[nitpick-test] Instrumenting with ASAN/UBSAN via clang...")
-        clang_cmd = [
-            "clang++",
-            "-fsanitize=address,undefined",
-            "-fno-omit-frame-pointer",
-            "-O1",
-            "-g",
-            str(ll_file),
-            str(runtime_lib),
-            "-latomic",
-            "-o", str(exe_file)
-        ]
-        res = subprocess.run(clang_cmd, capture_output=True, text=True)
-        if res.returncode != 0:
-            print("clang instrumentation failed:")
-            print(res.stderr)
-            sys.exit(1)
+    with ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
+        futures = {executor.submit(compile_and_run, tf, program_args, npkc_bin, runtime_lib): tf for tf in test_files}
+        
+        for future in as_completed(futures):
+            tf = futures[future]
+            try:
+                success, output = future.result()
+                results[tf.name] = (success, output)
+                if success:
+                    passed += 1
+                    print(f"✅ {tf.name}")
+                else:
+                    failed += 1
+                    print(f"❌ {tf.name}")
+            except Exception as e:
+                failed += 1
+                results[tf.name] = (False, str(e))
+                print(f"❌ {tf.name} (Exception)")
 
-        print(f"[nitpick-test] Running instrumented binary...\n")
-        run_cmd = [str(exe_file)] + program_args
-        
-        # Run with ASAN_OPTIONS=detect_leaks=1
-        env = os.environ.copy()
-        env["ASAN_OPTIONS"] = "detect_leaks=1,strict_string_checks=1,detect_stack_use_after_return=1"
-        
-        res = subprocess.run(run_cmd, env=env)
-        
-        print(f"\n[nitpick-test] Process exited with code {res.returncode}")
-        sys.exit(res.returncode)
+    print("\n" + "="*40)
+    print("TEST SUMMARY")
+    print("="*40)
+    print(f"Total: {len(test_files)}")
+    print(f"Passed: {passed}")
+    print(f"Failed: {failed}")
+    print("="*40)
+    
+    if failed > 0:
+        print("\nFailures:")
+        for name, (success, output) in results.items():
+            if not success:
+                print(f"\n--- {name} ---")
+                print(output)
+        sys.exit(1)
+    
+    sys.exit(0)
 
 if __name__ == "__main__":
     main()

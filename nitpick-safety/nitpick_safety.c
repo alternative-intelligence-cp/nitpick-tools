@@ -181,11 +181,38 @@ static void strip_nl(char *s)
     if (n > 0 && s[n - 1] == '\r') s[--n] = '\0';
 }
 
-/* Strip // line comment in-place.  Naive: does not handle // inside strings. */
-static void strip_line_comment(char *s)
+/* 
+ * mask_strings_and_comments: Masks string contents (replaces with space) to prevent
+ * false positive pattern/brace matches, and correctly strips // comments.
+ * Tracks quote state across lines to support multi-line strings.
+ */
+static void mask_strings_and_comments(char *s, int *in_quote)
 {
-    char *p = strstr(s, "//");
-    if (p) *p = '\0';
+    int escape = 0;
+    for (char *p = s; *p; p++) {
+        if (!*in_quote) {
+            if (*p == '/' && *(p+1) == '/') {
+                *p = '\0';
+                break;
+            }
+            if (*p == '"') *in_quote = 1;
+            else if (*p == '`') *in_quote = 2;
+        } else {
+            if (escape) {
+                *p = ' ';
+                escape = 0;
+            } else if (*p == '\\') {
+                *p = ' ';
+                escape = 1;
+            } else if ((*in_quote == 1 && *p == '"') || (*in_quote == 2 && *p == '`')) {
+                *in_quote = 0;
+            } else {
+                if (*p != '\n' && *p != '\r') {
+                    *p = ' ';
+                }
+            }
+        }
+    }
 }
 
 /*
@@ -228,13 +255,15 @@ static void scan_file(const char *path)
     int     fs_open_line = 0;   /* line where the opening '{' was found */
     int     fs_trivial   = 1;   /* cleared once we see non-trivial content */
 
+    int     in_quote     = 0;   /* string masking state: 0 = none, 1 = ", 2 = ` */
+
     while (fgets(raw, sizeof(raw), f)) {
         lineno++;
         strip_nl(raw);
 
         /* working copy: strip // comment so patterns don't fire in comments */
         memcpy(line, raw, strlen(raw) + 1);
-        strip_line_comment(line);
+        mask_strings_and_comments(line, &in_quote);
 
         /* first non-whitespace character */
         const char *trimmed = line;

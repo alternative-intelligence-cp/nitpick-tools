@@ -1,0 +1,17 @@
+
+=================================================================
+==3635740==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 1024 byte(s) in 1 object(s) allocated from:
+    #0 0x601777ddf5a3 in malloc (/tmp/tmpb3clw236/out_asan+0xc95a3) (BuildId: 144c365856ed91a2980d24cf04b80118505e06a3)
+    #1 0x601777e1ff85 in main (/tmp/tmpb3clw236/out_asan+0x109f85) (BuildId: 144c365856ed91a2980d24cf04b80118505e06a3)
+    #2 0x7b1593a2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #3 0x601777d44754 in _start (/tmp/tmpb3clw236/out_asan+0x2e754) (BuildId: 144c365856ed91a2980d24cf04b80118505e06a3)
+
+SUMMARY: AddressSanitizer: 1024 byte(s) leaked in 1 allocation(s).
+[nitpick-test] Compiling leaky.npk to LLVM IR...
+[nitpick-test] Instrumenting with ASAN/UBSAN via clang...
+[nitpick-test] Running instrumented binary...
+
+
+[nitpick-test] Process exited with code 1
