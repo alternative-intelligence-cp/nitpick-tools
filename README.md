@@ -11,10 +11,10 @@ These are early versions: small, tested, and honest about what they don't cover 
 | [`editors/vscode/`](editors/vscode/) | Syntax highlighting for `.npk` files: a TextMate grammar, which VS Code, Sublime Text and many other editors can use | v0.1, checked against the compiler at `aefae6e` |
 | [`editors/nano/`](editors/nano/) | Syntax highlighting for `.npk` files in GNU nano | v0.1, checked against the compiler at `aefae6e` |
 | [`editors/vim/`](editors/vim/) | Syntax highlighting for `.npk` files in vim | v0.1, checked against the compiler at `aefae6e` |
+| [`editors/emacs/`](editors/emacs/) | `nitpick-mode`, highlighting for `.npk` files in Emacs | v0.1, checked against the compiler at `aefae6e` |
 
 ## Planned
 
-- **More editors:** Emacs.
 - **An audit helper:** lists every place in a program that a safety reviewer must look at (`wild` memory, `raw` calls, relaxed atomics and the like) with file and line, as a checklist, so nothing is missed. It will use the compiler's own front end rather than text matching, so it can't be fooled by comments, strings or macros.
 
 ## Credits
