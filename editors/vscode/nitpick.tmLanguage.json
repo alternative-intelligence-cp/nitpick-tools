@@ -1,0 +1,355 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "fileTypes": [
+    "npk"
+  ],
+  "name": "Nitpick",
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#numbers"
+    },
+    {
+      "include": "#declarations"
+    },
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#operators"
+    },
+    {
+      "include": "#types-and-calls"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "begin": "/\\*",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.comment.nitpick"
+            }
+          },
+          "end": "\\*/",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.comment.nitpick"
+            }
+          },
+          "name": "comment.block.nitpick"
+        },
+        {
+          "captures": {
+            "1": {
+              "name": "punctuation.definition.comment.nitpick"
+            }
+          },
+          "match": "(//).*$",
+          "name": "comment.line.double-slash.nitpick"
+        }
+      ]
+    },
+    "declarations": {
+      "patterns": [
+        {
+          "captures": {
+            "1": {
+              "name": "storage.type.module.nitpick"
+            },
+            "2": {
+              "name": "punctuation.separator.declaration.nitpick"
+            },
+            "3": {
+              "name": "entity.name.module.nitpick"
+            }
+          },
+          "match": "\\b(mod)\\s*(:)\\s*([A-Za-z_][A-Za-z0-9_]*)",
+          "name": "meta.declaration.module.nitpick"
+        },
+        {
+          "captures": {
+            "1": {
+              "name": "storage.type.function.nitpick"
+            },
+            "2": {
+              "name": "punctuation.separator.declaration.nitpick"
+            },
+            "3": {
+              "name": "entity.name.function.nitpick"
+            }
+          },
+          "match": "\\b(func)\\s*(:)\\s*([A-Za-z_][A-Za-z0-9_]*)",
+          "name": "meta.declaration.function.nitpick"
+        },
+        {
+          "captures": {
+            "1": {
+              "name": "storage.type.declaration.nitpick"
+            },
+            "2": {
+              "name": "punctuation.separator.declaration.nitpick"
+            },
+            "3": {
+              "name": "entity.name.type.nitpick"
+            }
+          },
+          "match": "\\b(struct|enum|trait|error|unit|macro)\\s*(:)\\s*([A-Za-z_][A-Za-z0-9_]*)",
+          "name": "meta.declaration.type.nitpick"
+        }
+      ]
+    },
+    "escapes": {
+      "patterns": [
+        {
+          "match": "\\\\(?:u\\{[0-9a-fA-F]+\\}|x[0-9a-fA-F]{2}|.)",
+          "name": "constant.character.escape.nitpick"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "match": "\\b(if|else|for|while|loop|break|continue|return|pass|exit|fail|defer|pick|when|fall|then|till|end|in|is|as|on|with|where)\\b",
+          "name": "keyword.control.nitpick"
+        },
+        {
+          "match": "\\b(requires|ensures|decreases|invariant|old|result|limit|prove|assert_static)\\b",
+          "name": "keyword.other.contract.nitpick"
+        },
+        {
+          "match": "\\b(wild|wildx|raw|move|drop|discard|relay|give|gives|acquires|joins|never|fails)\\b",
+          "name": "keyword.other.safety.nitpick"
+        },
+        {
+          "match": "\\b(async|await|thread)\\b",
+          "name": "keyword.other.async.nitpick"
+        },
+        {
+          "match": "\\b(acquire|release|acq_rel|seq_cst|relaxed)\\b",
+          "name": "keyword.other.memory-order.nitpick"
+        },
+        {
+          "match": "\\b(is_err|range)\\b",
+          "name": "keyword.other.builtin.nitpick"
+        },
+        {
+          "match": "\\b(func|struct|enum|trait|impl|mod|use|error|unit|macro|extern)\\b",
+          "name": "storage.type.declaration.nitpick"
+        },
+        {
+          "match": "\\b(pub|fixed|sealed|hidden|pure|inline|noinline|nodrop|opaque|assoc|defaults|comptime|cfg|derive|unbounded)\\b",
+          "name": "storage.modifier.nitpick"
+        },
+        {
+          "match": "\\b(true|false|NIL|NULL|ERR)\\b",
+          "name": "constant.language.nitpick"
+        },
+        {
+          "match": "\\b(any|dyn|bool|char8|char16|char32|int8|int16|int32|int64|int128|int256|int512|int1024|int2048|int4096|uint8|uint16|uint32|uint64|uint128|uint256|uint512|uint1024|uint2048|uint4096|flt32|flt64|flt128|flt256|flt512|frac8|frac16|frac32|frac64|tfp32|tfp64|tfp128|tfp256|tbb8|tbb16|tbb32|tbb64|tbb128|tbb256|dim256|nit|trit|tryte|nyte|string|cstring|buffer|atomic|array|simd|complex|arena|shared_arena|stack|Result|Optional|Future|Handle|Guard|Mutex|RGuard|RwLock|Barrier|Channel|CondVar|OwnedFd|Self|Rules|pid|tid|uid|gid|fd|prot|oflags|mflags|fmode)\\b",
+          "name": "storage.type.builtin.nitpick"
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "match": "\\b\\d[\\d_]*\\.\\d[\\d_]*(?:[eE][+-]?\\d[\\d_]*)?(?:f32|f64|tfp32|tfp64|tfp128|tfp256|dim256)?\\b",
+          "name": "constant.numeric.float.nitpick"
+        },
+        {
+          "match": "\\b\\d[0-9a-fA-F_]*hex(?:i8|i16|i32|i64|i128|i256|i512|i1024|i2048|i4096|u8|u16|u32|u64|u128|u256|u512|u1024|u2048|u4096|tbb8|tbb16|tbb32|tbb64|tbb128|tbb256)?\\b",
+          "name": "constant.numeric.hex.nitpick"
+        },
+        {
+          "match": "\\b[01][01_]*bin(?:i8|i16|i32|i64|i128|i256|i512|i1024|i2048|i4096|u8|u16|u32|u64|u128|u256|u512|u1024|u2048|u4096|tbb8|tbb16|tbb32|tbb64|tbb128|tbb256)?\\b",
+          "name": "constant.numeric.binary.nitpick"
+        },
+        {
+          "match": "\\b[0-7][0-7_]*oct(?:i8|i16|i32|i64|i128|i256|i512|i1024|i2048|i4096|u8|u16|u32|u64|u128|u256|u512|u1024|u2048|u4096|tbb8|tbb16|tbb32|tbb64|tbb128|tbb256)?\\b",
+          "name": "constant.numeric.octal.nitpick"
+        },
+        {
+          "match": "\\b[01][01Tt_]*(?:ter|tri|t)(?:i8|i16|i32|i64|i128|i256|i512|i1024|i2048|i4096|u8|u16|u32|u64|u128|u256|u512|u1024|u2048|u4096|tbb8|tbb16|tbb32|tbb64|tbb128|tbb256)?\\b",
+          "name": "constant.numeric.ternary.nitpick"
+        },
+        {
+          "match": "\\b[0-4][0-4a-dA-D_]*(?:non|n)(?:i8|i16|i32|i64|i128|i256|i512|i1024|i2048|i4096|u8|u16|u32|u64|u128|u256|u512|u1024|u2048|u4096|tbb8|tbb16|tbb32|tbb64|tbb128|tbb256)?\\b",
+          "name": "constant.numeric.nonary.nitpick"
+        },
+        {
+          "match": "\\b\\d[\\d_]*(?:i8|i16|i32|i64|i128|i256|i512|i1024|i2048|i4096|u8|u16|u32|u64|u128|u256|u512|u1024|u2048|u4096|tbb8|tbb16|tbb32|tbb64|tbb128|tbb256|f32|f64|tfp32|tfp64|tfp128|tfp256|dim256|char8|char16|char32)?\\b",
+          "name": "constant.numeric.integer.nitpick"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "match": "::<",
+          "name": "keyword.operator.turbofish.nitpick"
+        },
+        {
+          "match": "\\$\\$[im]|=>!|\\?\\?!|\\?!|\\?\\||\\?\\.|\\?\\?|\\.\\.\\*|\\.\\.\\.|\\.\\.\\^|<=>|=>|<-|->|<<=|>>=|<<|>>|<=|>=|==|!=|\\+%|\\*%|-%|&&|\\|\\||\\+\\+|--|\\+=|-=|\\*=|%=|/=|&=|\\|=|\\^=|\\+%=|\\*%=|-%=|!!!|<\\||\\|>",
+          "name": "keyword.operator.nitpick"
+        },
+        {
+          "match": "[+\\-*/%=<>!&|^~@#$?]",
+          "name": "keyword.operator.nitpick"
+        },
+        {
+          "match": "_(\\?|!|~|\\^)",
+          "name": "keyword.operator.underscore.nitpick"
+        },
+        {
+          "match": "[:;,]",
+          "name": "punctuation.separator.nitpick"
+        },
+        {
+          "match": "\\.",
+          "name": "punctuation.accessor.nitpick"
+        },
+        {
+          "match": "[\\[{(]",
+          "name": "punctuation.section.brackets.begin.nitpick"
+        },
+        {
+          "match": "[\\]})]",
+          "name": "punctuation.section.brackets.end.nitpick"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "begin": "\"\"\"",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.begin.nitpick"
+            }
+          },
+          "end": "\"\"\"",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.end.nitpick"
+            }
+          },
+          "name": "string.quoted.triple.nitpick",
+          "patterns": [
+            {
+              "include": "#escapes"
+            }
+          ]
+        },
+        {
+          "captures": {
+            "0": {
+              "name": "string.quoted.other.raw.nitpick"
+            }
+          },
+          "match": "r\"[^\"]*\"",
+          "name": "string.quoted.other.raw.nitpick"
+        },
+        {
+          "begin": "\"",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.begin.nitpick"
+            }
+          },
+          "end": "\"",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.end.nitpick"
+            }
+          },
+          "name": "string.quoted.double.nitpick",
+          "patterns": [
+            {
+              "include": "#escapes"
+            }
+          ]
+        },
+        {
+          "begin": "`",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.template.begin.nitpick"
+            }
+          },
+          "end": "`",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.template.end.nitpick"
+            }
+          },
+          "name": "string.template.nitpick",
+          "patterns": [
+            {
+              "begin": "&\\{",
+              "beginCaptures": {
+                "0": {
+                  "name": "punctuation.section.interpolation.begin.nitpick"
+                }
+              },
+              "end": "\\}",
+              "endCaptures": {
+                "0": {
+                  "name": "punctuation.section.interpolation.end.nitpick"
+                }
+              },
+              "name": "meta.interpolation.nitpick",
+              "patterns": [
+                {
+                  "include": "$self"
+                }
+              ]
+            },
+            {
+              "include": "#escapes"
+            }
+          ]
+        },
+        {
+          "begin": "'",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.begin.nitpick"
+            }
+          },
+          "end": "'",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.end.nitpick"
+            }
+          },
+          "name": "string.quoted.single.nitpick",
+          "patterns": [
+            {
+              "include": "#escapes"
+            }
+          ]
+        }
+      ]
+    },
+    "types-and-calls": {
+      "patterns": [
+        {
+          "match": "\\b[A-Z][A-Za-z0-9_]*\\b",
+          "name": "support.type.nitpick"
+        },
+        {
+          "match": "[A-Za-z_][A-Za-z0-9_]*(?=\\s*\\()",
+          "name": "entity.name.function.call.nitpick"
+        }
+      ]
+    }
+  },
+  "scopeName": "source.nitpick"
+}

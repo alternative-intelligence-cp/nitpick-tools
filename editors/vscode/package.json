@@ -1,0 +1,39 @@
+{
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "grammars": [
+      {
+        "language": "nitpick",
+        "path": "./nitpick.tmLanguage.json",
+        "scopeName": "source.nitpick"
+      }
+    ],
+    "languages": [
+      {
+        "aliases": [
+          "Nitpick",
+          "nitpick"
+        ],
+        "configuration": "./language-configuration.json",
+        "extensions": [
+          ".npk"
+        ],
+        "id": "nitpick"
+      }
+    ]
+  },
+  "description": "Syntax highlighting for the Nitpick programming language (.npk).",
+  "displayName": "Nitpick Language Support",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "name": "nitpick",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alternative-intelligence-cp/nitpick-tools"
+  }
+}
