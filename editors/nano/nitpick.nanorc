@@ -1,0 +1,91 @@
+## First written by Muse Wonder (Meta); checked, with two fixes (closing
+## brackets, constants' colour), by Nitpick management (Claude Opus 5.5).
+## Syntax highlighting for Nitpick (.npk) in GNU nano.
+## Built from the lexer tables at nitpick commit aefae6e
+## (src/frontend/keywords.npk, lexer.npk, numeric.npk, num_width.npk,
+## escapes.npk, operators.npk). nano colours with POSIX extended regexes;
+## later rules paint over earlier ones, so comments and strings are last.
+
+syntax nitpick "\.npk$"
+comment "//"
+
+## Keywords (every word of keywords.npk, grouped as in the TextMate grammar)
+# control
+color brightred "\<(if|else|for|while|loop|break|continue|return|pass|exit|fail|defer|pick|when|fall|then|till|end|in|is|as|on|with|where)\>"
+# contract
+color red "\<(requires|ensures|decreases|invariant|old|result|limit|prove|assert_static)\>"
+# safety
+color magenta "\<(wild|wildx|raw|move|drop|discard|relay|give|gives|acquires|joins|never|fails)\>"
+# async
+color brightmagenta "\<(async|await|thread)\>"
+# memory-order
+color cyan "\<(acquire|release|acq_rel|seq_cst|relaxed)\>"
+# builtin-fn
+color brightcyan "\<(is_err|range)\>"
+# declaration
+color blue "\<(func|struct|enum|trait|impl|mod|use|error|unit|macro|extern)\>"
+# modifier
+color brightblue "\<(pub|fixed|sealed|hidden|pure|inline|noinline|nodrop|opaque|assoc|defaults|comptime|cfg|derive|unbounded)\>"
+# builtin-type
+color green "\<(any|dyn|bool|char8|char16|char32|int8|int16|int32|int64|int128|int256|int512|int1024|int2048|int4096|uint8|uint16|uint32|uint64|uint128|uint256|uint512|uint1024|uint2048|uint4096|flt32|flt64|flt128|flt256|flt512|frac8|frac16|frac32|frac64|tfp32|tfp64|tfp128|tfp256|tbb8|tbb16|tbb32|tbb64|tbb128|tbb256|dim256|nit|trit|tryte|nyte|string|cstring|buffer|atomic|array|simd|complex|arena|shared_arena|stack|Result|Optional|Future|Handle|Guard|Mutex|RGuard|RwLock|Barrier|Channel|CondVar|OwnedFd|Self|Rules|pid|tid|uid|gid|fd|prot|oflags|mflags|fmode)\>"
+
+## User-defined and prelude type names (Meters, Seconds, MyStruct, ...):
+## any capitalised word. A regex, not a word list, so it cannot clash
+## with the keyword table.
+color brightgreen "\<[A-Z][A-Za-z0-9_]*\>"
+## Language constants come after the capitalised-name rule, so NIL, NULL
+## and ERR keep the constant colour.
+# language-constant
+color yellow "\<(true|false|NIL|NULL|ERR)\>"
+
+## Operators (operators.npk). Longest spellings first in the alternation.
+color brightwhite "::<|\$\$[im]|=>!|\?\?!|\?!|\?\||\?\.|\?\?|\.\.\*|\.\.\.|\.\.\^|<=>|=>|<-|->|<<=|>>=|<<|>>|<=|>=|==|!=|\+%|\*%|-%|&&|\|\||\+\+|--|\+=|-=|\*=|%=|/=|&=|\|=|\^=|\+%="
+color brightwhite "\*%="
+color brightwhite "-%="
+color brightwhite "!!!"
+color brightwhite "<\||\|>"
+color brightwhite "_(\?|!|~|\^)"
+color brightwhite "[$@+*/%=<>!&|^~#?-]"
+color brightwhite "[:;,]"
+color brightwhite "\."
+color brightwhite "[[{(]"
+color brightwhite "[]})]"
+## Number literals (numeric.npk / num_width.npk). Bases are spelled as
+## suffixes -- hex, bin, oct, ter/tri/t, non/n -- never 0x/0b prefixes.
+## flt128 is storage-only (D-143) and has no literals, so there is
+## deliberately no f128 suffix in these rules.
+color brightyellow "\<[0-9][0-9_]*\.[0-9][0-9_]*([eE][+-]?[0-9][0-9_]*)?(f32|f64|tfp32|tfp64|tfp128|tfp256|dim256)?\>"
+color brightyellow "\<[0-9][0-9A-Fa-f_]*hex(i8|i16|i32|i64|i128|i256|i512|i1024|i2048|i4096|u8|u16|u32|u64|u128|u256|u512|u1024|u2048|u4096|tbb8|tbb16|tbb32|tbb64|tbb128|tbb256)?\>"
+color brightyellow "\<[01][01_]*bin(i8|i16|i32|i64|i128|i256|i512|i1024|i2048|i4096|u8|u16|u32|u64|u128|u256|u512|u1024|u2048|u4096|tbb8|tbb16|tbb32|tbb64|tbb128|tbb256)?\>"
+color brightyellow "\<[0-7][0-7_]*oct(i8|i16|i32|i64|i128|i256|i512|i1024|i2048|i4096|u8|u16|u32|u64|u128|u256|u512|u1024|u2048|u4096|tbb8|tbb16|tbb32|tbb64|tbb128|tbb256)?\>"
+color brightyellow "\<[01][01Tt_]*ter(i8|i16|i32|i64|i128|i256|i512|i1024|i2048|i4096|u8|u16|u32|u64|u128|u256|u512|u1024|u2048|u4096|tbb8|tbb16|tbb32|tbb64|tbb128|tbb256)?\>"
+color brightyellow "\<[01][01Tt_]*tri(i8|i16|i32|i64|i128|i256|i512|i1024|i2048|i4096|u8|u16|u32|u64|u128|u256|u512|u1024|u2048|u4096|tbb8|tbb16|tbb32|tbb64|tbb128|tbb256)?\>"
+color brightyellow "\<[01][01Tt_]*t(i8|i16|i32|i64|i128|i256|i512|i1024|i2048|i4096|u8|u16|u32|u64|u128|u256|u512|u1024|u2048|u4096|tbb8|tbb16|tbb32|tbb64|tbb128|tbb256)?\>"
+color brightyellow "\<[0-4][0-4A-Da-d_]*non(i8|i16|i32|i64|i128|i256|i512|i1024|i2048|i4096|u8|u16|u32|u64|u128|u256|u512|u1024|u2048|u4096|tbb8|tbb16|tbb32|tbb64|tbb128|tbb256)?\>"
+color brightyellow "\<[0-4][0-4A-Da-d_]*n(i8|i16|i32|i64|i128|i256|i512|i1024|i2048|i4096|u8|u16|u32|u64|u128|u256|u512|u1024|u2048|u4096|tbb8|tbb16|tbb32|tbb64|tbb128|tbb256)?\>"
+color brightyellow "\<[0-9][0-9_]*(i8|i16|i32|i64|i128|i256|i512|i1024|i2048|i4096|u8|u16|u32|u64|u128|u256|u512|u1024|u2048|u4096|tbb8|tbb16|tbb32|tbb64|tbb128|tbb256)?\>"
+color brightyellow "\<[0-9][0-9_]*(f32|f64|tfp32|tfp64|tfp128|tfp256|dim256)\>"
+color brightyellow "\<[0-9][0-9_]*(char8|char16|char32)\>"
+
+
+## Strings, characters, escapes and comments come LAST: nano paints
+## later rules over earlier ones, so these win over keywords, numbers
+## and operators inside them.
+## Block comments: nano regions cannot nest. Nitpick block comments do
+## not nest either (the lexer ends a block comment at the first */),
+## so nano paints exactly what the lexer sees: in
+##   /* outer /* inner */ code
+## the comment ends at the first */ and "code" is painted as code.
+color white start="\"\"\"" end="\"\"\""
+## One-line strings and chars are single regexes, not start/end regions:
+## a region would end at an escaped quote (\") and the real closing
+## quote would then open a new region over the code that follows.
+color white "\"([^\"\\]|\\.)*\""
+color white start="`" end="`"
+color white "'([^'\\]|\\.)*'"
+## Escapes (escapes.npk: \n \t \r \0 \\ \" \' \xHH \u{...} and any
+## escaped char). Painted over strings and chars; a backslash escape in
+## plain code is painted too -- nano cannot scope a rule to strings only.
+color yellow,black "\\(u\{[0-9A-Fa-f]+\}|x[0-9A-Fa-f][0-9A-Fa-f]|.)"
+color brightblack start="/\*" end="\*/"
+color brightblack "//.*"
